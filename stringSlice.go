@@ -3,24 +3,36 @@ package nullable
 import "encoding/json"
 
 type StringSlice struct {
-	Set   bool
-	Value []string
+	set   bool
+	value []string
 }
 
 func (s *StringSlice) SetValue(value []string) {
-	s.Set = true
-	s.Value = value
+	s.set = true
+	s.value = value
+}
+
+func (s StringSlice) Value() []string {
+	return s.value
 }
 
 func (s *StringSlice) UnmarshalJSON(data []byte) error {
-	s.Set = true
-	return json.Unmarshal(data, &s.Value)
+	s.set = true
+	return json.Unmarshal(data, &s.value)
 }
 
-func (s *StringSlice) Removed() bool {
-	return s.Set && s.Value == nil
+func (s StringSlice) IsSet() bool {
+	return s.set
+}
+
+func (s StringSlice) Removed() bool {
+	return s.set && s.value == nil
+}
+
+func (s StringSlice) interfaceValue() interface{} {
+	return s.value
 }
 
 func (s *StringSlice) IsEmpty() bool {
-	return s.Set && s.Value != nil && len(s.Value) == 0
+	return s.set && s.value != nil && len(s.value) == 0
 }

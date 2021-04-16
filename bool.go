@@ -3,8 +3,8 @@ package nullable
 import "encoding/json"
 
 type Bool struct {
-	Set   bool
-	Value *bool
+	set   bool
+	value *bool
 }
 
 func (b *Bool) SetValue(value bool) {
@@ -12,15 +12,27 @@ func (b *Bool) SetValue(value bool) {
 }
 
 func (b *Bool) SetPtr(value *bool) {
-	b.Set = true
-	b.Value = value
+	b.set = true
+	b.value = value
+}
+
+func (b Bool) Value() *bool {
+	return b.value
 }
 
 func (b *Bool) UnmarshalJSON(data []byte) error {
-	b.Set = true
-	return json.Unmarshal(data, &b.Value)
+	b.set = true
+	return json.Unmarshal(data, &b.value)
 }
 
-func (b *Bool) Removed() bool {
-	return b.Set && b.Value == nil
+func (b Bool) IsSet() bool {
+	return b.set
+}
+
+func (b Bool) Removed() bool {
+	return b.set && b.value == nil
+}
+
+func (b Bool) interfaceValue() interface{} {
+	return b.value
 }

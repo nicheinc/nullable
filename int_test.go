@@ -11,6 +11,9 @@ import (
 
 const testInt = 42
 
+// Ensure implementation of Nullable interface.
+var _ Nullable = &Int{}
+
 func TestInt_UnmarshalJSON(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -21,24 +24,24 @@ func TestInt_UnmarshalJSON(t *testing.T) {
 			name: "EmptyJSONObject",
 			json: `{}`,
 			expected: Int{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 		},
 		{
 			name: "NullInt",
 			json: `{"int": null}`,
 			expected: Int{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name: "ValueInt",
 			json: fmt.Sprintf(`{"int": %v}`, testInt),
 			expected: Int{
-				Set:   true,
-				Value: test.IntToPtr(testInt),
+				set:   true,
+				value: test.IntToPtr(testInt),
 			},
 		},
 	}
@@ -68,16 +71,16 @@ func TestInt_SetValue(t *testing.T) {
 			name:  "NullInt",
 			value: nil,
 			expected: Int{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name:  "ValueInt",
 			value: test.IntToPtr(testInt),
 			expected: Int{
-				Set:   true,
-				Value: test.IntToPtr(testInt),
+				set:   true,
+				value: test.IntToPtr(testInt),
 			},
 		},
 	}
@@ -106,24 +109,24 @@ func TestInt_Removed(t *testing.T) {
 		{
 			name: "NotSet",
 			i: Int{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullInt",
 			i: Int{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: true,
 		},
 		{
 			name: "ValueInt",
 			i: Int{
-				Set:   true,
-				Value: test.IntToPtr(testInt),
+				set:   true,
+				value: test.IntToPtr(testInt),
 			},
 			expected: false,
 		},
@@ -148,32 +151,32 @@ func TestInt_IsZero(t *testing.T) {
 		{
 			name: "NotSet",
 			i: Int{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullInt",
 			i: Int{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "ZeroInt",
 			i: Int{
-				Set:   true,
-				Value: test.IntToPtr(0),
+				set:   true,
+				value: test.IntToPtr(0),
 			},
 			expected: true,
 		},
 		{
 			name: "NonZeroInt",
 			i: Int{
-				Set:   true,
-				Value: test.IntToPtr(1),
+				set:   true,
+				value: test.IntToPtr(1),
 			},
 			expected: false,
 		},
@@ -198,32 +201,32 @@ func TestInt_IsNegative(t *testing.T) {
 		{
 			name: "NotSet",
 			i: Int{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullInt",
 			i: Int{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NegativeInt",
 			i: Int{
-				Set:   true,
-				Value: test.IntToPtr(-1),
+				set:   true,
+				value: test.IntToPtr(-1),
 			},
 			expected: true,
 		},
 		{
 			name: "PositiveInt",
 			i: Int{
-				Set:   true,
-				Value: test.IntToPtr(1),
+				set:   true,
+				value: test.IntToPtr(1),
 			},
 			expected: false,
 		},

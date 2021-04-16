@@ -8,6 +8,9 @@ import (
 	"github.com/nicheinc/go-common/v12/test"
 )
 
+// Ensure implementation of Nullable interface.
+var _ Nullable = &String{}
+
 func TestString_UnmarshalJSON(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -18,40 +21,40 @@ func TestString_UnmarshalJSON(t *testing.T) {
 			name: "EmptyJSONObject",
 			json: `{}`,
 			expected: String{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 		},
 		{
 			name: "NullString",
 			json: `{"string": null}`,
 			expected: String{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name: "EmptyString",
 			json: `{"string": ""}`,
 			expected: String{
-				Set:   true,
-				Value: test.StrToPtr(""),
+				set:   true,
+				value: test.StrToPtr(""),
 			},
 		},
 		{
 			name: "SpaceString",
 			json: `{"string": " "}`,
 			expected: String{
-				Set:   true,
-				Value: test.StrToPtr(" "),
+				set:   true,
+				value: test.StrToPtr(" "),
 			},
 		},
 		{
 			name: "ValueString",
 			json: `{"string": "value"}`,
 			expected: String{
-				Set:   true,
-				Value: test.StrToPtr("value"),
+				set:   true,
+				value: test.StrToPtr("value"),
 			},
 		},
 	}
@@ -81,32 +84,32 @@ func TestString_SetValue(t *testing.T) {
 			name:  "NullString",
 			value: nil,
 			expected: String{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name:  "EmptyString",
 			value: test.StrToPtr(""),
 			expected: String{
-				Set:   true,
-				Value: test.StrToPtr(""),
+				set:   true,
+				value: test.StrToPtr(""),
 			},
 		},
 		{
 			name:  "SpaceString",
 			value: test.StrToPtr(" "),
 			expected: String{
-				Set:   true,
-				Value: test.StrToPtr(" "),
+				set:   true,
+				value: test.StrToPtr(" "),
 			},
 		},
 		{
 			name:  "ValueString",
 			value: test.StrToPtr("value"),
 			expected: String{
-				Set:   true,
-				Value: test.StrToPtr("value"),
+				set:   true,
+				value: test.StrToPtr("value"),
 			},
 		},
 	}
@@ -135,40 +138,40 @@ func TestString_Removed(t *testing.T) {
 		{
 			name: "NotSet",
 			str: String{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullString",
 			str: String{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: true,
 		},
 		{
 			name: "EmptyString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr(""),
+				set:   true,
+				value: test.StrToPtr(""),
 			},
 			expected: false,
 		},
 		{
 			name: "SpaceString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr(" "),
+				set:   true,
+				value: test.StrToPtr(" "),
 			},
 			expected: false,
 		},
 		{
 			name: "ValueString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr("value"),
+				set:   true,
+				value: test.StrToPtr("value"),
 			},
 			expected: false,
 		},
@@ -193,56 +196,56 @@ func TestString_IsEmpty(t *testing.T) {
 		{
 			name: "NotSet",
 			str: String{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullString",
 			str: String{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "EmptyString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr(""),
+				set:   true,
+				value: test.StrToPtr(""),
 			},
 			expected: true,
 		},
 		{
 			name: "SpaceString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr(" "),
+				set:   true,
+				value: test.StrToPtr(" "),
 			},
 			expected: true,
 		},
 		{
 			name: "TabString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr("\t"),
+				set:   true,
+				value: test.StrToPtr("\t"),
 			},
 			expected: true,
 		},
 		{
 			name: "NewlineString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr("\n"),
+				set:   true,
+				value: test.StrToPtr("\n"),
 			},
 			expected: true,
 		},
 		{
 			name: "ValueString",
 			str: String{
-				Set:   true,
-				Value: test.StrToPtr("value"),
+				set:   true,
+				value: test.StrToPtr("value"),
 			},
 			expected: false,
 		},

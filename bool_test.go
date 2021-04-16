@@ -9,6 +9,9 @@ import (
 	"github.com/nicheinc/go-common/v12/test"
 )
 
+// Ensure implementation of Nullable interface.
+var _ Nullable = &Bool{}
+
 func TestBool_UnmarshalJSON(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -19,24 +22,24 @@ func TestBool_UnmarshalJSON(t *testing.T) {
 			name: "EmptyJSONObject",
 			json: `{}`,
 			expected: Bool{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 		},
 		{
 			name: "NullBool",
 			json: `{"int": null}`,
 			expected: Bool{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name: "ValueBool",
 			json: fmt.Sprintf(`{"int": %v}`, true),
 			expected: Bool{
-				Set:   true,
-				Value: test.BoolToPtr(true),
+				set:   true,
+				value: test.BoolToPtr(true),
 			},
 		},
 	}
@@ -66,16 +69,16 @@ func TestBool_SetValue(t *testing.T) {
 			name:  "NullBool",
 			value: nil,
 			expected: Bool{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name:  "ValueBool",
 			value: test.BoolToPtr(true),
 			expected: Bool{
-				Set:   true,
-				Value: test.BoolToPtr(true),
+				set:   true,
+				value: test.BoolToPtr(true),
 			},
 		},
 	}
@@ -104,24 +107,24 @@ func TestBool_Removed(t *testing.T) {
 		{
 			name: "NotSet",
 			b: Bool{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullBool",
 			b: Bool{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: true,
 		},
 		{
 			name: "ValueBool",
 			b: Bool{
-				Set:   true,
-				Value: test.BoolToPtr(true),
+				set:   true,
+				value: test.BoolToPtr(true),
 			},
 			expected: false,
 		},

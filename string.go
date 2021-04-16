@@ -6,8 +6,8 @@ import (
 )
 
 type String struct {
-	Set   bool
-	Value *string
+	set   bool
+	value *string
 }
 
 func (s *String) SetValue(value string) {
@@ -15,19 +15,31 @@ func (s *String) SetValue(value string) {
 }
 
 func (s *String) SetPtr(value *string) {
-	s.Set = true
-	s.Value = value
+	s.set = true
+	s.value = value
+}
+
+func (s String) Value() *string {
+	return s.value
 }
 
 func (s *String) UnmarshalJSON(data []byte) error {
-	s.Set = true
-	return json.Unmarshal(data, &s.Value)
+	s.set = true
+	return json.Unmarshal(data, &s.value)
 }
 
-func (s *String) Removed() bool {
-	return s.Set && s.Value == nil
+func (s String) IsSet() bool {
+	return s.set
 }
 
-func (s *String) IsEmpty() bool {
-	return s.Set && s.Value != nil && strings.TrimSpace(*s.Value) == ""
+func (s String) Removed() bool {
+	return s.set && s.value == nil
+}
+
+func (s String) interfaceValue() interface{} {
+	return s.value
+}
+
+func (s String) IsEmpty() bool {
+	return s.set && s.value != nil && strings.TrimSpace(*s.value) == ""
 }

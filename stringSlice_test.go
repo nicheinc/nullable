@@ -9,6 +9,9 @@ import (
 
 const testString = "e^(i*tau) = 1"
 
+// Ensure implementation of Nullable interface.
+var _ Nullable = &StringSlice{}
+
 func TestStringSlice_UnmarshalJSON(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -19,32 +22,32 @@ func TestStringSlice_UnmarshalJSON(t *testing.T) {
 			name: "EmptyJSONObject",
 			json: `{}`,
 			expected: StringSlice{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 		},
 		{
 			name: "NullStringSlice",
 			json: `{"stringSlice": null}`,
 			expected: StringSlice{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name: "EmptyStringSlice",
 			json: `{"stringSlice": []}`,
 			expected: StringSlice{
-				Set:   true,
-				Value: []string{},
+				set:   true,
+				value: []string{},
 			},
 		},
 		{
 			name: "NonEmptyStringSlice",
 			json: fmt.Sprintf(`{"stringSlice": ["%s"]}`, testString),
 			expected: StringSlice{
-				Set:   true,
-				Value: []string{testString},
+				set:   true,
+				value: []string{testString},
 			},
 		},
 	}
@@ -74,24 +77,24 @@ func TestStringSlice_SetValue(t *testing.T) {
 			name:  "NullStringSlice",
 			value: nil,
 			expected: StringSlice{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 		},
 		{
 			name:  "EmptyStringSlice",
 			value: []string{},
 			expected: StringSlice{
-				Set:   true,
-				Value: []string{},
+				set:   true,
+				value: []string{},
 			},
 		},
 		{
 			name:  "NonEmptyStringSlice",
 			value: []string{testString},
 			expected: StringSlice{
-				Set:   true,
-				Value: []string{testString},
+				set:   true,
+				value: []string{testString},
 			},
 		},
 	}
@@ -116,32 +119,32 @@ func TestStringSlice_Removed(t *testing.T) {
 		{
 			name: "NotSet",
 			strSlice: StringSlice{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullStringSlice",
 			strSlice: StringSlice{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: true,
 		},
 		{
 			name: "EmptyStringSlice",
 			strSlice: StringSlice{
-				Set:   true,
-				Value: []string{},
+				set:   true,
+				value: []string{},
 			},
 			expected: false,
 		},
 		{
 			name: "NonEmptyStringSlice",
 			strSlice: StringSlice{
-				Set:   true,
-				Value: []string{testString},
+				set:   true,
+				value: []string{testString},
 			},
 			expected: false,
 		},
@@ -166,32 +169,32 @@ func TestStringSlice_IsEmpty(t *testing.T) {
 		{
 			name: "NotSet",
 			strSlice: StringSlice{
-				Set:   false,
-				Value: nil,
+				set:   false,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "NullStringSlice",
 			strSlice: StringSlice{
-				Set:   true,
-				Value: nil,
+				set:   true,
+				value: nil,
 			},
 			expected: false,
 		},
 		{
 			name: "EmptyStringSlice",
 			strSlice: StringSlice{
-				Set:   true,
-				Value: []string{},
+				set:   true,
+				value: []string{},
 			},
 			expected: true,
 		},
 		{
 			name: "NonEmptyStringSlice",
 			strSlice: StringSlice{
-				Set:   true,
-				Value: []string{testString},
+				set:   true,
+				value: []string{testString},
 			},
 			expected: false,
 		},
