@@ -2,7 +2,6 @@ package nullable
 
 import "encoding/json"
 
-// Int represents an int struct field that can be
 type Int struct {
 	set   bool
 	value *int
