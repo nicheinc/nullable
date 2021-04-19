@@ -25,25 +25,30 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 		if key == nil {
 			continue
 		}
-		// Prepend a comma if this is not the first field marshalled.
-		if prependComma {
-			buf = append(buf, ',')
-		} else {
-			prependComma = true
-		}
 		appendField := func(fieldInterface interface{}) error {
-			fieldBuf, err := json.Marshal(fieldInterface)
+			valueBuf, err := json.Marshal(fieldInterface)
 			if err != nil {
 				return err
 			}
-			// Reserve space for the quoted key, a colon, and the value.
-			addition := make([]byte, 0, len(*key)+len(fieldBuf)+3)
-			addition = append(addition, '"')
-			addition = append(addition, *key...)
-			addition = append(addition, `":`...)
-			addition = append(addition, fieldBuf...)
-			// Append to the buffer.
-			buf = append(buf, addition...)
+			// Allocate space for the quoted key, a colon, and the value, as well
+			// as a leading comma if this isn't the first field marshalled.
+			capacity := len(*key) + len(valueBuf) + 3
+			if prependComma {
+				capacity += 1
+			}
+			fieldBuf := make([]byte, 0, capacity)
+			// Append the components of the field data.
+			if prependComma {
+				fieldBuf = append(fieldBuf, `,"`...)
+			} else {
+				fieldBuf = append(fieldBuf, '"')
+				prependComma = true
+			}
+			fieldBuf = append(fieldBuf, *key...)
+			fieldBuf = append(fieldBuf, `":`...)
+			fieldBuf = append(fieldBuf, valueBuf...)
+			// Append this field's buffer to the overall buffer.
+			buf = append(buf, fieldBuf...)
 			return nil
 		}
 		switch field := fieldValue.Addr().Interface().(type) {
