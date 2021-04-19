@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
-
-	"github.com/nicheinc/go-common/v12/test"
 )
 
 // Ensure implementation of Nullable interface.
@@ -72,17 +70,17 @@ func TestString_SetValue(t *testing.T) {
 		},
 		{
 			name:     "EmptyString",
-			value:    test.StrToPtr(""),
+			value:    func(v string) *string { return &v }(""),
 			expected: MakeString(""),
 		},
 		{
 			name:     "SpaceString",
-			value:    test.StrToPtr(" "),
+			value:    func(v string) *string { return &v }(" "),
 			expected: MakeString(" "),
 		},
 		{
 			name:     "ValueString",
-			value:    test.StrToPtr("value"),
+			value:    func(v string) *string { return &v }("value"),
 			expected: MakeString("value"),
 		},
 	}

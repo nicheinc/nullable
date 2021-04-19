@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/nicheinc/go-common/v12/test"
 )
 
 const testInt = 42
@@ -65,7 +63,7 @@ func TestInt_SetValue(t *testing.T) {
 		},
 		{
 			name:     "ValueInt",
-			value:    test.IntToPtr(testInt),
+			value:    func(v int) *int { return &v }(testInt),
 			expected: MakeInt(testInt),
 		},
 	}

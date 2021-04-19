@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/nicheinc/go-common/v12/test"
 )
 
 // Ensure implementation of Nullable interface.
@@ -63,7 +61,7 @@ func TestBool_SetValue(t *testing.T) {
 		},
 		{
 			name:     "ValueBool",
-			value:    test.BoolToPtr(true),
+			value:    func(v bool) *bool { return &v }(true),
 			expected: MakeBool(true),
 		},
 	}

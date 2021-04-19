@@ -1,2 +1,0 @@
-# github.com/nicheinc/go-common/v12 v12.5.1
-github.com/nicheinc/go-common/v12/test
