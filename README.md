@@ -15,14 +15,22 @@ type Update struct {
 
 ...
 
-update := Update {
+out := Update {
     ID:   1,
     Name: nullable.MakeString("Alice"),
 }
-data, err := nullable.MarshalJSON(&update) // {"name":"Alice"}
+data, err := nullable.MarshalJSON(&out)
+// data: {"name":"Alice"}
 
-update.Flag.SetPtr(nil)
-data, err = nullable.MarshalJSON(&update)  // {"name":"Alice","flag":null}
+out.Flag.SetPtr(nil)
+data, err = nullable.MarshalJSON(&out)
+// data: {"name":"Alice","flag":null}
+
+in := Update{}
+data = []byte(`{"flag":true}`)
+err := json.Unmarshal(data, &in)
+// in.Name.IsSet(): false
+// *in.Flag.Value(): true
 ```
 
 ## Motivation
@@ -34,7 +42,7 @@ structure can be updated according to the following rules:
 - If the field is present but `null`, the corresponding field is removed
 - If the field is absent, the corresponding value is left unmodified
 
-We sometimes need to define go structs (for example the
+We want to define go structs (for example the
 [`EntityUpdate`](https://github.com/nicheinc/entity/blob/9c8bb0fe92e4e77e3af339c30b29fd122c190cd3/entity.go#L70-L78)
 type in the `entity` service) corresponding to these updates, which need to be
 marshalled to/from JSON.
@@ -71,7 +79,7 @@ exceptions:
 - The `string` tag option is ignored
 
 Note that the `omitempty` option does not affect `Nullable` types. The default
-JSON marshaller never omits struct values, but `nullable.MarhsalJSON` takes the
+JSON marshaller never omits struct values, but `nullable.MarshalJSON` takes the
 use of a `Nullable` type as an indication to omit the field if it's unset, even
 if `omitempty` is absent.
 
