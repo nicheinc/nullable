@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// MarshalJSON is a reimplementation of json.Marshal that understands Nullable
+// types. Any struct that contains Nullable fields should call this function
+// instead of the default json.Marshal. See the README for more detail.
 func MarshalJSON(v interface{}) ([]byte, error) {
 	var (
 		reflectedType  = reflect.TypeOf(v).Elem()

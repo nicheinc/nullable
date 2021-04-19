@@ -71,9 +71,9 @@ fields, this package provides the `nullable.MarshalJSON` function, which
 implements a version of `json.Marshal` that respects the unset/removed status
 of `Nullable` types.
 
-`nullable.MarshalJSON` should behave exactly like
-[`json.Marshal`](https://golang.org/pkg/encoding/json/#Marshal), with a few
-exceptions:
+Aside from `Nullable` fields, `nullable.MarshalJSON` should behave exactly like
+[`json.Marshal`](https://golang.org/pkg/encoding/json/#Marshal), with the
+following exceptions:
 
 - Anonymous fields are skipped
 - The `string` tag option is ignored
