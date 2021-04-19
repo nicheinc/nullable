@@ -10,8 +10,12 @@ import (
 // types. Any struct that contains Nullable fields should call this function
 // instead of the default json.Marshal. See the README for more detail.
 func MarshalJSON(v interface{}) ([]byte, error) {
+	reflectedType := reflect.TypeOf(v).Elem()
+	// Delegate non-struct values to the default implementation.
+	if reflectedType.Kind() != reflect.Struct {
+		return json.Marshal(v)
+	}
 	var (
-		reflectedType  = reflect.TypeOf(v).Elem()
 		reflectedValue = reflect.ValueOf(v).Elem()
 		buf            = []byte{'{'}
 		prependComma   = false

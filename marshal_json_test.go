@@ -157,6 +157,10 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 		input interface{}
 	}{
 		{
+			name:  "Primitive",
+			input: new(int),
+		},
+		{
 			name:  "EmptyStruct",
 			input: &struct{}{},
 		},
