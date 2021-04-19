@@ -24,12 +24,12 @@ func TestBool_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "NullBool",
 			json:     `{"int": null}`,
-			expected: MakeBoolPtr(nil),
+			expected: NewBoolPtr(nil),
 		},
 		{
 			name:     "ValueBool",
 			json:     fmt.Sprintf(`{"int": %v}`, true),
-			expected: MakeBool(true),
+			expected: NewBool(true),
 		},
 	}
 
@@ -57,12 +57,12 @@ func TestBool_SetValue(t *testing.T) {
 		{
 			name:     "NullBool",
 			value:    nil,
-			expected: MakeBoolPtr(nil),
+			expected: NewBoolPtr(nil),
 		},
 		{
 			name:     "ValueBool",
 			value:    func(v bool) *bool { return &v }(true),
-			expected: MakeBool(true),
+			expected: NewBool(true),
 		},
 	}
 
@@ -94,12 +94,12 @@ func TestBool_Removed(t *testing.T) {
 		},
 		{
 			name:     "NullBool",
-			b:        MakeBoolPtr(nil),
+			b:        NewBoolPtr(nil),
 			expected: true,
 		},
 		{
 			name:     "ValueBool",
-			b:        MakeBool(true),
+			b:        NewBool(true),
 			expected: false,
 		},
 	}

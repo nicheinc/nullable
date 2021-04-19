@@ -7,8 +7,8 @@ type StringSlice struct {
 	value []string
 }
 
-// MakeStringSlice returns a StringSlice set to the given value.
-func MakeStringSlice(v []string) StringSlice {
+// NewStringSlice returns a StringSlice set to the given value.
+func NewStringSlice(v []string) StringSlice {
 	return StringSlice{
 		set:   true,
 		value: v,

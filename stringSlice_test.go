@@ -26,17 +26,17 @@ func TestStringSlice_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "NullStringSlice",
 			json:     `{"stringSlice": null}`,
-			expected: MakeStringSlice(nil),
+			expected: NewStringSlice(nil),
 		},
 		{
 			name:     "EmptyStringSlice",
 			json:     `{"stringSlice": []}`,
-			expected: MakeStringSlice([]string{}),
+			expected: NewStringSlice([]string{}),
 		},
 		{
 			name:     "NonEmptyStringSlice",
 			json:     fmt.Sprintf(`{"stringSlice": ["%s"]}`, testString),
-			expected: MakeStringSlice([]string{testString}),
+			expected: NewStringSlice([]string{testString}),
 		},
 	}
 
@@ -64,17 +64,17 @@ func TestStringSlice_SetValue(t *testing.T) {
 		{
 			name:     "NullStringSlice",
 			value:    nil,
-			expected: MakeStringSlice(nil),
+			expected: NewStringSlice(nil),
 		},
 		{
 			name:     "EmptyStringSlice",
 			value:    []string{},
-			expected: MakeStringSlice([]string{}),
+			expected: NewStringSlice([]string{}),
 		},
 		{
 			name:     "NonEmptyStringSlice",
 			value:    []string{testString},
-			expected: MakeStringSlice([]string{testString}),
+			expected: NewStringSlice([]string{testString}),
 		},
 	}
 
@@ -102,17 +102,17 @@ func TestStringSlice_Removed(t *testing.T) {
 		},
 		{
 			name:     "NullStringSlice",
-			strSlice: MakeStringSlice(nil),
+			strSlice: NewStringSlice(nil),
 			expected: true,
 		},
 		{
 			name:     "EmptyStringSlice",
-			strSlice: MakeStringSlice([]string{}),
+			strSlice: NewStringSlice([]string{}),
 			expected: false,
 		},
 		{
 			name:     "NonEmptyStringSlice",
-			strSlice: MakeStringSlice([]string{testString}),
+			strSlice: NewStringSlice([]string{testString}),
 			expected: false,
 		},
 	}
@@ -140,17 +140,17 @@ func TestStringSlice_IsEmpty(t *testing.T) {
 		},
 		{
 			name:     "NullStringSlice",
-			strSlice: MakeStringSlice(nil),
+			strSlice: NewStringSlice(nil),
 			expected: false,
 		},
 		{
 			name:     "EmptyStringSlice",
-			strSlice: MakeStringSlice([]string{}),
+			strSlice: NewStringSlice([]string{}),
 			expected: true,
 		},
 		{
 			name:     "NonEmptyStringSlice",
-			strSlice: MakeStringSlice([]string{testString}),
+			strSlice: NewStringSlice([]string{testString}),
 			expected: false,
 		},
 	}

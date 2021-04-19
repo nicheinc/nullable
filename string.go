@@ -10,16 +10,16 @@ type String struct {
 	value *string
 }
 
-// MakeString returns a String set to the given value.
-func MakeString(v string) String {
+// NewString returns a String set to the given value.
+func NewString(v string) String {
 	return String{
 		set:   true,
 		value: &v,
 	}
 }
 
-// MakeStringPtr returns a String set to the given pointer.
-func MakeStringPtr(v *string) String {
+// NewStringPtr returns a String set to the given pointer.
+func NewStringPtr(v *string) String {
 	return String{
 		set:   true,
 		value: v,

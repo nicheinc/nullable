@@ -23,22 +23,22 @@ func TestString_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "NullString",
 			json:     `{"string": null}`,
-			expected: MakeStringPtr(nil),
+			expected: NewStringPtr(nil),
 		},
 		{
 			name:     "EmptyString",
 			json:     `{"string": ""}`,
-			expected: MakeString(""),
+			expected: NewString(""),
 		},
 		{
 			name:     "SpaceString",
 			json:     `{"string": " "}`,
-			expected: MakeString(" "),
+			expected: NewString(" "),
 		},
 		{
 			name:     "ValueString",
 			json:     `{"string": "value"}`,
-			expected: MakeString("value"),
+			expected: NewString("value"),
 		},
 	}
 
@@ -66,22 +66,22 @@ func TestString_SetValue(t *testing.T) {
 		{
 			name:     "NullString",
 			value:    nil,
-			expected: MakeStringPtr(nil),
+			expected: NewStringPtr(nil),
 		},
 		{
 			name:     "EmptyString",
 			value:    func(v string) *string { return &v }(""),
-			expected: MakeString(""),
+			expected: NewString(""),
 		},
 		{
 			name:     "SpaceString",
 			value:    func(v string) *string { return &v }(" "),
-			expected: MakeString(" "),
+			expected: NewString(" "),
 		},
 		{
 			name:     "ValueString",
 			value:    func(v string) *string { return &v }("value"),
-			expected: MakeString("value"),
+			expected: NewString("value"),
 		},
 	}
 
@@ -113,22 +113,22 @@ func TestString_Removed(t *testing.T) {
 		},
 		{
 			name:     "NullString",
-			str:      MakeStringPtr(nil),
+			str:      NewStringPtr(nil),
 			expected: true,
 		},
 		{
 			name:     "EmptyString",
-			str:      MakeString(""),
+			str:      NewString(""),
 			expected: false,
 		},
 		{
 			name:     "SpaceString",
-			str:      MakeString(" "),
+			str:      NewString(" "),
 			expected: false,
 		},
 		{
 			name:     "ValueString",
-			str:      MakeString("value"),
+			str:      NewString("value"),
 			expected: false,
 		},
 	}
@@ -156,32 +156,32 @@ func TestString_IsEmpty(t *testing.T) {
 		},
 		{
 			name:     "NullString",
-			str:      MakeStringPtr(nil),
+			str:      NewStringPtr(nil),
 			expected: false,
 		},
 		{
 			name:     "EmptyString",
-			str:      MakeString(""),
+			str:      NewString(""),
 			expected: true,
 		},
 		{
 			name:     "SpaceString",
-			str:      MakeString(" "),
+			str:      NewString(" "),
 			expected: true,
 		},
 		{
 			name:     "TabString",
-			str:      MakeString("\t"),
+			str:      NewString("\t"),
 			expected: true,
 		},
 		{
 			name:     "NewlineString",
-			str:      MakeString("\n"),
+			str:      NewString("\n"),
 			expected: true,
 		},
 		{
 			name:     "ValueString",
-			str:      MakeString("value"),
+			str:      NewString("value"),
 			expected: false,
 		},
 	}

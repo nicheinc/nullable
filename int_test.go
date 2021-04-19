@@ -26,12 +26,12 @@ func TestInt_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "NullInt",
 			json:     `{"int": null}`,
-			expected: MakeIntPtr(nil),
+			expected: NewIntPtr(nil),
 		},
 		{
 			name:     "ValueInt",
 			json:     fmt.Sprintf(`{"int": %v}`, testInt),
-			expected: MakeInt(testInt),
+			expected: NewInt(testInt),
 		},
 	}
 
@@ -59,12 +59,12 @@ func TestInt_SetValue(t *testing.T) {
 		{
 			name:     "NullInt",
 			value:    nil,
-			expected: MakeIntPtr(nil),
+			expected: NewIntPtr(nil),
 		},
 		{
 			name:     "ValueInt",
 			value:    func(v int) *int { return &v }(testInt),
-			expected: MakeInt(testInt),
+			expected: NewInt(testInt),
 		},
 	}
 
@@ -96,12 +96,12 @@ func TestInt_Removed(t *testing.T) {
 		},
 		{
 			name:     "NullInt",
-			i:        MakeIntPtr(nil),
+			i:        NewIntPtr(nil),
 			expected: true,
 		},
 		{
 			name:     "ValueInt",
-			i:        MakeInt(testInt),
+			i:        NewInt(testInt),
 			expected: false,
 		},
 	}
@@ -129,17 +129,17 @@ func TestInt_IsZero(t *testing.T) {
 		},
 		{
 			name:     "NullInt",
-			i:        MakeIntPtr(nil),
+			i:        NewIntPtr(nil),
 			expected: false,
 		},
 		{
 			name:     "ZeroInt",
-			i:        MakeInt(0),
+			i:        NewInt(0),
 			expected: true,
 		},
 		{
 			name:     "NonZeroInt",
-			i:        MakeInt(1),
+			i:        NewInt(1),
 			expected: false,
 		},
 	}
@@ -167,17 +167,17 @@ func TestInt_IsNegative(t *testing.T) {
 		},
 		{
 			name:     "NullInt",
-			i:        MakeIntPtr(nil),
+			i:        NewIntPtr(nil),
 			expected: false,
 		},
 		{
 			name:     "NegativeInt",
-			i:        MakeInt(-1),
+			i:        NewInt(-1),
 			expected: true,
 		},
 		{
 			name:     "PositiveInt",
-			i:        MakeInt(1),
+			i:        NewInt(1),
 			expected: false,
 		},
 	}

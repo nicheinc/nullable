@@ -84,7 +84,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			input: &struct {
 				Field Int
 			}{
-				Field: MakeIntPtr(nil),
+				Field: NewIntPtr(nil),
 			},
 			expected: `{"Field":null}`,
 		},
@@ -93,7 +93,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			input: &struct {
 				Field Int
 			}{
-				Field: MakeInt(1),
+				Field: NewInt(1),
 			},
 			expected: `{"Field":1}`,
 		},
@@ -213,7 +213,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field Int
 			}{
-				Field: MakeIntPtr(nil),
+				Field: NewIntPtr(nil),
 			},
 		},
 		{
@@ -221,7 +221,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field Int
 			}{
-				Field: MakeInt(1),
+				Field: NewInt(1),
 			},
 		},
 		{
@@ -237,7 +237,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field Bool
 			}{
-				Field: MakeBoolPtr(nil),
+				Field: NewBoolPtr(nil),
 			},
 		},
 		{
@@ -245,7 +245,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field Bool
 			}{
-				Field: MakeBool(true),
+				Field: NewBool(true),
 			},
 		},
 		{
@@ -261,7 +261,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field String
 			}{
-				Field: MakeStringPtr(nil),
+				Field: NewStringPtr(nil),
 			},
 		},
 		{
@@ -269,7 +269,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field String
 			}{
-				Field: MakeString(""),
+				Field: NewString(""),
 			},
 		},
 		{
@@ -285,7 +285,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field StringSlice
 			}{
-				Field: MakeStringSlice(nil),
+				Field: NewStringSlice(nil),
 			},
 		},
 		{
@@ -293,7 +293,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field StringSlice
 			}{
-				Field: MakeStringSlice([]string{}),
+				Field: NewStringSlice([]string{}),
 			},
 		},
 		{
@@ -316,10 +316,10 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 				NoTag:            1,
 				EmptyName:        2,
 				NonNullableI:     3,
-				NullableStr:      MakeStringPtr(nil),
-				NullableI:        MakeInt(4),
-				NullableB:        MakeBool(true),
-				NullableStrSlice: MakeStringSlice([]string{"Hello, world!"}),
+				NullableStr:      NewStringPtr(nil),
+				NullableI:        NewInt(4),
+				NullableB:        NewBool(true),
+				NullableStrSlice: NewStringSlice([]string{"Hello, world!"}),
 			},
 		},
 	}
