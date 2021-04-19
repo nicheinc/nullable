@@ -37,8 +37,7 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 			addition := make([]byte, 0, len(*key)+len(fieldBuf)+3)
 			addition = append(addition, '"')
 			addition = append(addition, *key...)
-			addition = append(addition, '"')
-			addition = append(addition, ':')
+			addition = append(addition, `":`...)
 			addition = append(addition, fieldBuf...)
 			// Append to the buffer.
 			buf = append(buf, addition...)

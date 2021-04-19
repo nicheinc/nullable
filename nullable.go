@@ -5,6 +5,6 @@ type Nullable interface {
 	IsSet() bool
 	Removed() bool
 	UnmarshalJSON(data []byte) error
-	// valueInterface is used internally to marshal the value of any Nullable.
+	// valueInterface is used internally for marshalling structs of Nullables.
 	interfaceValue() interface{}
 }

@@ -19,28 +19,19 @@ func TestBool_UnmarshalJSON(t *testing.T) {
 		expected Bool
 	}{
 		{
-			name: "EmptyJSONObject",
-			json: `{}`,
-			expected: Bool{
-				set:   false,
-				value: nil,
-			},
+			name:     "EmptyJSONObject",
+			json:     `{}`,
+			expected: Bool{},
 		},
 		{
-			name: "NullBool",
-			json: `{"int": null}`,
-			expected: Bool{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullBool",
+			json:     `{"int": null}`,
+			expected: MakeBoolPtr(nil),
 		},
 		{
-			name: "ValueBool",
-			json: fmt.Sprintf(`{"int": %v}`, true),
-			expected: Bool{
-				set:   true,
-				value: test.BoolToPtr(true),
-			},
+			name:     "ValueBool",
+			json:     fmt.Sprintf(`{"int": %v}`, true),
+			expected: MakeBool(true),
 		},
 	}
 
@@ -66,20 +57,14 @@ func TestBool_SetValue(t *testing.T) {
 		expected Bool
 	}{
 		{
-			name:  "NullBool",
-			value: nil,
-			expected: Bool{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullBool",
+			value:    nil,
+			expected: MakeBoolPtr(nil),
 		},
 		{
-			name:  "ValueBool",
-			value: test.BoolToPtr(true),
-			expected: Bool{
-				set:   true,
-				value: test.BoolToPtr(true),
-			},
+			name:     "ValueBool",
+			value:    test.BoolToPtr(true),
+			expected: MakeBool(true),
 		},
 	}
 
@@ -105,27 +90,18 @@ func TestBool_Removed(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			b: Bool{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			b:        Bool{},
 			expected: false,
 		},
 		{
-			name: "NullBool",
-			b: Bool{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullBool",
+			b:        MakeBoolPtr(nil),
 			expected: true,
 		},
 		{
-			name: "ValueBool",
-			b: Bool{
-				set:   true,
-				value: test.BoolToPtr(true),
-			},
+			name:     "ValueBool",
+			b:        MakeBool(true),
 			expected: false,
 		},
 	}
@@ -137,5 +113,17 @@ func TestBool_Removed(t *testing.T) {
 				t.Errorf("Expected: %v, Actual: %v", testCase.expected, actual)
 			}
 		})
+	}
+}
+
+func TestBool_Value(t *testing.T) {
+	var b Bool
+	if b.Value() != nil {
+		t.Errorf("Expected: nil, Actual: %v", b.Value())
+	}
+	expected := true
+	b.SetValue(expected)
+	if *b.Value() != expected {
+		t.Errorf("Expected: %v, Actual: %v", expected, *b.Value())
 	}
 }

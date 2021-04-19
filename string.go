@@ -10,6 +10,22 @@ type String struct {
 	value *string
 }
 
+// MakeString returns a String set to the given value.
+func MakeString(v string) String {
+	return String{
+		set:   true,
+		value: &v,
+	}
+}
+
+// MakeStringPtr returns a String set to the given pointer.
+func MakeStringPtr(v *string) String {
+	return String{
+		set:   true,
+		value: v,
+	}
+}
+
 func (s *String) SetValue(value string) {
 	s.SetPtr(&value)
 }
@@ -40,6 +56,7 @@ func (s String) interfaceValue() interface{} {
 	return s.value
 }
 
+// IsEmpty checks whether the String is set to a string containing only whitespace.
 func (s String) IsEmpty() bool {
 	return s.set && s.value != nil && strings.TrimSpace(*s.value) == ""
 }

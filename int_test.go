@@ -21,28 +21,19 @@ func TestInt_UnmarshalJSON(t *testing.T) {
 		expected Int
 	}{
 		{
-			name: "EmptyJSONObject",
-			json: `{}`,
-			expected: Int{
-				set:   false,
-				value: nil,
-			},
+			name:     "EmptyJSONObject",
+			json:     `{}`,
+			expected: Int{},
 		},
 		{
-			name: "NullInt",
-			json: `{"int": null}`,
-			expected: Int{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullInt",
+			json:     `{"int": null}`,
+			expected: MakeIntPtr(nil),
 		},
 		{
-			name: "ValueInt",
-			json: fmt.Sprintf(`{"int": %v}`, testInt),
-			expected: Int{
-				set:   true,
-				value: test.IntToPtr(testInt),
-			},
+			name:     "ValueInt",
+			json:     fmt.Sprintf(`{"int": %v}`, testInt),
+			expected: MakeInt(testInt),
 		},
 	}
 
@@ -68,20 +59,14 @@ func TestInt_SetValue(t *testing.T) {
 		expected Int
 	}{
 		{
-			name:  "NullInt",
-			value: nil,
-			expected: Int{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullInt",
+			value:    nil,
+			expected: MakeIntPtr(nil),
 		},
 		{
-			name:  "ValueInt",
-			value: test.IntToPtr(testInt),
-			expected: Int{
-				set:   true,
-				value: test.IntToPtr(testInt),
-			},
+			name:     "ValueInt",
+			value:    test.IntToPtr(testInt),
+			expected: MakeInt(testInt),
 		},
 	}
 
@@ -107,27 +92,18 @@ func TestInt_Removed(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			i: Int{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			i:        Int{},
 			expected: false,
 		},
 		{
-			name: "NullInt",
-			i: Int{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullInt",
+			i:        MakeIntPtr(nil),
 			expected: true,
 		},
 		{
-			name: "ValueInt",
-			i: Int{
-				set:   true,
-				value: test.IntToPtr(testInt),
-			},
+			name:     "ValueInt",
+			i:        MakeInt(testInt),
 			expected: false,
 		},
 	}
@@ -149,35 +125,23 @@ func TestInt_IsZero(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			i: Int{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			i:        Int{},
 			expected: false,
 		},
 		{
-			name: "NullInt",
-			i: Int{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullInt",
+			i:        MakeIntPtr(nil),
 			expected: false,
 		},
 		{
-			name: "ZeroInt",
-			i: Int{
-				set:   true,
-				value: test.IntToPtr(0),
-			},
+			name:     "ZeroInt",
+			i:        MakeInt(0),
 			expected: true,
 		},
 		{
-			name: "NonZeroInt",
-			i: Int{
-				set:   true,
-				value: test.IntToPtr(1),
-			},
+			name:     "NonZeroInt",
+			i:        MakeInt(1),
 			expected: false,
 		},
 	}
@@ -199,35 +163,23 @@ func TestInt_IsNegative(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			i: Int{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			i:        Int{},
 			expected: false,
 		},
 		{
-			name: "NullInt",
-			i: Int{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullInt",
+			i:        MakeIntPtr(nil),
 			expected: false,
 		},
 		{
-			name: "NegativeInt",
-			i: Int{
-				set:   true,
-				value: test.IntToPtr(-1),
-			},
+			name:     "NegativeInt",
+			i:        MakeInt(-1),
 			expected: true,
 		},
 		{
-			name: "PositiveInt",
-			i: Int{
-				set:   true,
-				value: test.IntToPtr(1),
-			},
+			name:     "PositiveInt",
+			i:        MakeInt(1),
 			expected: false,
 		},
 	}
@@ -239,5 +191,17 @@ func TestInt_IsNegative(t *testing.T) {
 				t.Errorf("Expected: %v, Actual: %v", testCase.expected, actual)
 			}
 		})
+	}
+}
+
+func TestInt_Value(t *testing.T) {
+	i := Int{}
+	if i.Value() != nil {
+		t.Errorf("Expected: nil, Actual: %v", i.Value())
+	}
+	expected := 1
+	i.SetValue(expected)
+	if *i.Value() != expected {
+		t.Errorf("Expected: %v, Actual: %v", expected, *i.Value())
 	}
 }

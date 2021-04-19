@@ -7,6 +7,22 @@ type Bool struct {
 	value *bool
 }
 
+// MakeBool returns a Bool set to the given value.
+func MakeBool(v bool) Bool {
+	return Bool{
+		set:   true,
+		value: &v,
+	}
+}
+
+// MakeBoolPtr returns a Bool set to the given pointer.
+func MakeBoolPtr(v *bool) Bool {
+	return Bool{
+		set:   true,
+		value: v,
+	}
+}
+
 func (b *Bool) SetValue(value bool) {
 	b.SetPtr(&value)
 }

@@ -19,36 +19,24 @@ func TestStringSlice_UnmarshalJSON(t *testing.T) {
 		expected StringSlice
 	}{
 		{
-			name: "EmptyJSONObject",
-			json: `{}`,
-			expected: StringSlice{
-				set:   false,
-				value: nil,
-			},
+			name:     "EmptyJSONObject",
+			json:     `{}`,
+			expected: StringSlice{},
 		},
 		{
-			name: "NullStringSlice",
-			json: `{"stringSlice": null}`,
-			expected: StringSlice{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullStringSlice",
+			json:     `{"stringSlice": null}`,
+			expected: MakeStringSlice(nil),
 		},
 		{
-			name: "EmptyStringSlice",
-			json: `{"stringSlice": []}`,
-			expected: StringSlice{
-				set:   true,
-				value: []string{},
-			},
+			name:     "EmptyStringSlice",
+			json:     `{"stringSlice": []}`,
+			expected: MakeStringSlice([]string{}),
 		},
 		{
-			name: "NonEmptyStringSlice",
-			json: fmt.Sprintf(`{"stringSlice": ["%s"]}`, testString),
-			expected: StringSlice{
-				set:   true,
-				value: []string{testString},
-			},
+			name:     "NonEmptyStringSlice",
+			json:     fmt.Sprintf(`{"stringSlice": ["%s"]}`, testString),
+			expected: MakeStringSlice([]string{testString}),
 		},
 	}
 
@@ -74,28 +62,19 @@ func TestStringSlice_SetValue(t *testing.T) {
 		expected StringSlice
 	}{
 		{
-			name:  "NullStringSlice",
-			value: nil,
-			expected: StringSlice{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullStringSlice",
+			value:    nil,
+			expected: MakeStringSlice(nil),
 		},
 		{
-			name:  "EmptyStringSlice",
-			value: []string{},
-			expected: StringSlice{
-				set:   true,
-				value: []string{},
-			},
+			name:     "EmptyStringSlice",
+			value:    []string{},
+			expected: MakeStringSlice([]string{}),
 		},
 		{
-			name:  "NonEmptyStringSlice",
-			value: []string{testString},
-			expected: StringSlice{
-				set:   true,
-				value: []string{testString},
-			},
+			name:     "NonEmptyStringSlice",
+			value:    []string{testString},
+			expected: MakeStringSlice([]string{testString}),
 		},
 	}
 
@@ -117,35 +96,23 @@ func TestStringSlice_Removed(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			strSlice: StringSlice{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			strSlice: StringSlice{},
 			expected: false,
 		},
 		{
-			name: "NullStringSlice",
-			strSlice: StringSlice{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullStringSlice",
+			strSlice: MakeStringSlice(nil),
 			expected: true,
 		},
 		{
-			name: "EmptyStringSlice",
-			strSlice: StringSlice{
-				set:   true,
-				value: []string{},
-			},
+			name:     "EmptyStringSlice",
+			strSlice: MakeStringSlice([]string{}),
 			expected: false,
 		},
 		{
-			name: "NonEmptyStringSlice",
-			strSlice: StringSlice{
-				set:   true,
-				value: []string{testString},
-			},
+			name:     "NonEmptyStringSlice",
+			strSlice: MakeStringSlice([]string{testString}),
 			expected: false,
 		},
 	}
@@ -167,35 +134,23 @@ func TestStringSlice_IsEmpty(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			strSlice: StringSlice{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			strSlice: StringSlice{},
 			expected: false,
 		},
 		{
-			name: "NullStringSlice",
-			strSlice: StringSlice{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullStringSlice",
+			strSlice: MakeStringSlice(nil),
 			expected: false,
 		},
 		{
-			name: "EmptyStringSlice",
-			strSlice: StringSlice{
-				set:   true,
-				value: []string{},
-			},
+			name:     "EmptyStringSlice",
+			strSlice: MakeStringSlice([]string{}),
 			expected: true,
 		},
 		{
-			name: "NonEmptyStringSlice",
-			strSlice: StringSlice{
-				set:   true,
-				value: []string{testString},
-			},
+			name:     "NonEmptyStringSlice",
+			strSlice: MakeStringSlice([]string{testString}),
 			expected: false,
 		},
 	}
@@ -207,5 +162,17 @@ func TestStringSlice_IsEmpty(t *testing.T) {
 				t.Errorf("Expected: %v, Actual: %v", testCase.expected, actual)
 			}
 		})
+	}
+}
+
+func TestStringSlice_Value(t *testing.T) {
+	s := StringSlice{}
+	if s.Value() != nil {
+		t.Errorf("Expected: nil, Actual: %v", s.Value())
+	}
+	expected := []string{"value"}
+	s.SetValue(expected)
+	if !reflect.DeepEqual(s.Value(), expected) {
+		t.Errorf("Expected: %v, Actual: %v", expected, s.Value())
 	}
 }

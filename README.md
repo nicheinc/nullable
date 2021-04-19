@@ -4,9 +4,30 @@ This package provides `Nullable` field types, which enable distinguishing
 between unset fields and fields explicitly set to null when marshalling to/from
 JSON.
 
+## Example Usage
+
+```go
+type Update struct {
+    ID   int             `json:"-"`
+    Name nullable.String `json:"name"`
+    Flag nullable.Bool   `json:"flag"`
+}
+
+...
+
+update := Update {
+    ID:   1,
+    Name: nullable.MakeString("Alice"),
+}
+data, err := nullable.MarshalJSON(&update) // {"name":"Alice"}
+
+update.Flag.SetPtr(nil)
+data, err = nullable.MarshalJSON(&update)  // {"name":"Alice","flag":null}
+```
+
 ## Motivation
 
-We define certain data updates using JSON objects, where each field in a
+We define certain data updates using JSON objects, where each field in some
 structure can be updated according to the following rules:
 
 - If the field is present and non-`null`, the corresponding value is updated
@@ -48,6 +69,11 @@ exceptions:
 
 - Anonymous fields are skipped
 - The `string` tag option is ignored
+
+Note that the `omitempty` option does not affect `Nullable` types. The default
+JSON marshaller never omits struct values, but `nullable.MarhsalJSON` takes the
+use of a `Nullable` type as an indication to omit the field if it's unset, even
+if `omitempty` is absent.
 
 To avoid accidentally calling the default implementation, it may be prudent to
 implement a `MarshalJSON` for relevant types that simply calls

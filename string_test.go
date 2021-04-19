@@ -18,44 +18,29 @@ func TestString_UnmarshalJSON(t *testing.T) {
 		expected String
 	}{
 		{
-			name: "EmptyJSONObject",
-			json: `{}`,
-			expected: String{
-				set:   false,
-				value: nil,
-			},
+			name:     "EmptyJSONObject",
+			json:     `{}`,
+			expected: String{},
 		},
 		{
-			name: "NullString",
-			json: `{"string": null}`,
-			expected: String{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullString",
+			json:     `{"string": null}`,
+			expected: MakeStringPtr(nil),
 		},
 		{
-			name: "EmptyString",
-			json: `{"string": ""}`,
-			expected: String{
-				set:   true,
-				value: test.StrToPtr(""),
-			},
+			name:     "EmptyString",
+			json:     `{"string": ""}`,
+			expected: MakeString(""),
 		},
 		{
-			name: "SpaceString",
-			json: `{"string": " "}`,
-			expected: String{
-				set:   true,
-				value: test.StrToPtr(" "),
-			},
+			name:     "SpaceString",
+			json:     `{"string": " "}`,
+			expected: MakeString(" "),
 		},
 		{
-			name: "ValueString",
-			json: `{"string": "value"}`,
-			expected: String{
-				set:   true,
-				value: test.StrToPtr("value"),
-			},
+			name:     "ValueString",
+			json:     `{"string": "value"}`,
+			expected: MakeString("value"),
 		},
 	}
 
@@ -81,36 +66,24 @@ func TestString_SetValue(t *testing.T) {
 		expected String
 	}{
 		{
-			name:  "NullString",
-			value: nil,
-			expected: String{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullString",
+			value:    nil,
+			expected: MakeStringPtr(nil),
 		},
 		{
-			name:  "EmptyString",
-			value: test.StrToPtr(""),
-			expected: String{
-				set:   true,
-				value: test.StrToPtr(""),
-			},
+			name:     "EmptyString",
+			value:    test.StrToPtr(""),
+			expected: MakeString(""),
 		},
 		{
-			name:  "SpaceString",
-			value: test.StrToPtr(" "),
-			expected: String{
-				set:   true,
-				value: test.StrToPtr(" "),
-			},
+			name:     "SpaceString",
+			value:    test.StrToPtr(" "),
+			expected: MakeString(" "),
 		},
 		{
-			name:  "ValueString",
-			value: test.StrToPtr("value"),
-			expected: String{
-				set:   true,
-				value: test.StrToPtr("value"),
-			},
+			name:     "ValueString",
+			value:    test.StrToPtr("value"),
+			expected: MakeString("value"),
 		},
 	}
 
@@ -136,43 +109,28 @@ func TestString_Removed(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			str: String{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			str:      String{},
 			expected: false,
 		},
 		{
-			name: "NullString",
-			str: String{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullString",
+			str:      MakeStringPtr(nil),
 			expected: true,
 		},
 		{
-			name: "EmptyString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr(""),
-			},
+			name:     "EmptyString",
+			str:      MakeString(""),
 			expected: false,
 		},
 		{
-			name: "SpaceString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr(" "),
-			},
+			name:     "SpaceString",
+			str:      MakeString(" "),
 			expected: false,
 		},
 		{
-			name: "ValueString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr("value"),
-			},
+			name:     "ValueString",
+			str:      MakeString("value"),
 			expected: false,
 		},
 	}
@@ -194,59 +152,38 @@ func TestString_IsEmpty(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "NotSet",
-			str: String{
-				set:   false,
-				value: nil,
-			},
+			name:     "NotSet",
+			str:      String{},
 			expected: false,
 		},
 		{
-			name: "NullString",
-			str: String{
-				set:   true,
-				value: nil,
-			},
+			name:     "NullString",
+			str:      MakeStringPtr(nil),
 			expected: false,
 		},
 		{
-			name: "EmptyString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr(""),
-			},
+			name:     "EmptyString",
+			str:      MakeString(""),
 			expected: true,
 		},
 		{
-			name: "SpaceString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr(" "),
-			},
+			name:     "SpaceString",
+			str:      MakeString(" "),
 			expected: true,
 		},
 		{
-			name: "TabString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr("\t"),
-			},
+			name:     "TabString",
+			str:      MakeString("\t"),
 			expected: true,
 		},
 		{
-			name: "NewlineString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr("\n"),
-			},
+			name:     "NewlineString",
+			str:      MakeString("\n"),
 			expected: true,
 		},
 		{
-			name: "ValueString",
-			str: String{
-				set:   true,
-				value: test.StrToPtr("value"),
-			},
+			name:     "ValueString",
+			str:      MakeString("value"),
 			expected: false,
 		},
 	}
@@ -258,5 +195,17 @@ func TestString_IsEmpty(t *testing.T) {
 				t.Errorf("Expected: %v, Actual: %v", testCase.expected, actual)
 			}
 		})
+	}
+}
+
+func TestString_Value(t *testing.T) {
+	var s String
+	if s.Value() != nil {
+		t.Errorf("Expected: nil, Actual: %v", s.Value())
+	}
+	expected := "value"
+	s.SetValue(expected)
+	if *s.Value() != expected {
+		t.Errorf("Expected: %v, Actual: %v", expected, *s.Value())
 	}
 }

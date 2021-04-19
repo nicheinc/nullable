@@ -8,6 +8,22 @@ type Int struct {
 	value *int
 }
 
+// MakeInt returns an Int set to the given value.
+func MakeInt(v int) Int {
+	return Int{
+		set:   true,
+		value: &v,
+	}
+}
+
+// MakeIntPtr returns an Int set to the given pointer.
+func MakeIntPtr(v *int) Int {
+	return Int{
+		set:   true,
+		value: v,
+	}
+}
+
 func (i *Int) SetValue(value int) {
 	i.SetPtr(&value)
 }
