@@ -6,24 +6,21 @@ import (
 	"testing"
 )
 
-type kitchenSink struct {
-	unexported       int
-	Omitted          int `json:"-"`
-	NoTag            int
-	EmptyName        int         `json:","`
-	NonNullableI     int         `json:"nonNullableI,omitempty"`
-	NullableStr      String      `json:"nullableStr,omitempty"`
-	NullableI        Int         `json:"nullableI,omitempty"`
-	NullableB        Bool        `json:"nullableB,omitempty"`
-	NullableStrSlice StringSlice `json:"nullableStrSlice,omitempty"`
-}
-
 func TestMarshalJSON_OneWay(t *testing.T) {
 	testCases := []struct {
 		name     string
 		input    interface{}
 		expected string
 	}{
+		{
+			name: "Unexported",
+			input: &struct {
+				unexported int
+			}{
+				unexported: 0,
+			},
+			expected: "{}",
+		},
 		{
 			name: "Omitted",
 			input: &struct {
@@ -51,6 +48,27 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 				Ptr:   nil,
 			},
 			expected: `{}`,
+		},
+		{
+			name: "Omitempy/Nonempty",
+			input: &struct {
+				Slice      []int    `json:",omitempty"`
+				B          bool     `json:",omitempty"`
+				I          int      `json:",omitempty"`
+				U          uint     `json:",omitempty"`
+				F          float32  `json:",omitempty"`
+				Ptr        *int     `json:",omitempty"`
+				NeverEmpty struct{} `json:",omitempty"`
+			}{
+				Slice:      []int{1},
+				B:          true,
+				I:          1,
+				U:          1,
+				F:          1,
+				Ptr:        func(v int) *int { return &v }(1),
+				NeverEmpty: struct{}{},
+			},
+			expected: `{"Slice":[1],"B":true,"I":1,"U":1,"F":1,"Ptr":1,"NeverEmpty":{}}`,
 		},
 		{
 			name: "NoTag",
@@ -310,20 +328,6 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 				First:  1,
 				Second: 2,
 				Third:  3,
-			},
-		},
-		{
-			name: "KitchenSink",
-			input: &kitchenSink{
-				unexported:       0,
-				Omitted:          0,
-				NoTag:            1,
-				EmptyName:        2,
-				NonNullableI:     3,
-				NullableStr:      NewStringPtr(nil),
-				NullableI:        NewInt(4),
-				NullableB:        NewBool(true),
-				NullableStrSlice: NewStringSlice([]string{"Hello, world!"}),
 			},
 		},
 	}
