@@ -13,6 +13,20 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		expected string
 	}{
 		{
+			name:     "Primitive",
+			input:    5,
+			expected: "5",
+		},
+		{
+			name: "StructValue",
+			input: struct {
+				Value int
+			}{
+				Value: 5,
+			},
+			expected: `{"Value":5}`,
+		},
+		{
 			name: "Unexported",
 			input: &struct {
 				unexported int
@@ -163,7 +177,7 @@ func roundTrip(t *testing.T, input interface{}) interface{} {
 		t.Errorf("Error while marshalling: %v", err)
 	}
 	// Unmarshal resulting JSON to output.
-	if err := json.Unmarshal(data, &output); err != nil {
+	if err := json.Unmarshal(data, output); err != nil {
 		t.Errorf("Error while unmarshalling: %v", err)
 	}
 	return output

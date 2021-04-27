@@ -10,6 +10,17 @@ import (
 // types. Any struct that contains Nullable fields should call this function
 // instead of the default json.Marshal. See the README for more detail.
 func MarshalJSON(v interface{}) ([]byte, error) {
+	// This implementation only works on pointers. This is because to check
+	// whether each field implements Nullable, we need to take each field's
+	// address. But the reflected value of an interface containing a struct
+	// value is not addressable (see https://golang.org/pkg/reflect/#Value.CanAddr).
+	//
+	// The simplest workaround is if v is not already a pointer, marshal its
+	// address instead.
+	if reflect.TypeOf(v).Kind() != reflect.Ptr {
+		return MarshalJSON(&v)
+	}
+	// Now that we know v is a pointer, get its element type.
 	reflectedType := reflect.TypeOf(v).Elem()
 	// Delegate non-struct values to the default implementation.
 	if reflectedType.Kind() != reflect.Struct {
