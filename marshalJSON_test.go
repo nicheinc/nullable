@@ -285,6 +285,30 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			},
 		},
 		{
+			name: "NullableFloat64/Unset",
+			input: &struct {
+				Field Float64
+			}{
+				Field: Float64{},
+			},
+		},
+		{
+			name: "NullableFloat64/Removed",
+			input: &struct {
+				Field Float64
+			}{
+				Field: NewFloat64Ptr(nil),
+			},
+		},
+		{
+			name: "NullableFloat64/Set",
+			input: &struct {
+				Field Float64
+			}{
+				Field: NewFloat64(1.0),
+			},
+		},
+		{
 			name: "NullableString/Unset",
 			input: &struct {
 				Field String
