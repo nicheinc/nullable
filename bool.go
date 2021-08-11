@@ -49,6 +49,6 @@ func (b Bool) Removed() bool {
 	return b.set && b.value == nil
 }
 
-func (b Bool) interfaceValue() interface{} {
+func (b Bool) InterfaceValue() interface{} {
 	return b.value
 }

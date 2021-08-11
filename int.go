@@ -49,7 +49,7 @@ func (i Int) Removed() bool {
 	return i.set && i.value == nil
 }
 
-func (i Int) interfaceValue() interface{} {
+func (i Int) InterfaceValue() interface{} {
 	return i.value
 }
 

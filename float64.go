@@ -49,7 +49,7 @@ func (i Float64) Removed() bool {
 	return i.set && i.value == nil
 }
 
-func (i Float64) interfaceValue() interface{} {
+func (i Float64) InterfaceValue() interface{} {
 	return i.value
 }
 
