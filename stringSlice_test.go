@@ -176,3 +176,15 @@ func TestStringSlice_Value(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, s.Value())
 	}
 }
+
+func TestStringSlice_InterfaceValue(t *testing.T) {
+	var s StringSlice
+	if !reflect.ValueOf(s.InterfaceValue()).IsNil() {
+		t.Errorf("Expected: nil, Actual: %v", s.InterfaceValue())
+	}
+	expected := []string{"value"}
+	s.SetValue(expected)
+	if !reflect.DeepEqual(s.InterfaceValue(), expected) {
+		t.Errorf("Expected: %v, Actual: %v", expected, s.InterfaceValue())
+	}
+}

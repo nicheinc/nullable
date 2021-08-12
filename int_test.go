@@ -193,7 +193,7 @@ func TestInt_IsNegative(t *testing.T) {
 }
 
 func TestInt_Value(t *testing.T) {
-	i := Int{}
+	var i Int
 	if i.Value() != nil {
 		t.Errorf("Expected: nil, Actual: %v", i.Value())
 	}
@@ -201,5 +201,17 @@ func TestInt_Value(t *testing.T) {
 	i.SetValue(expected)
 	if *i.Value() != expected {
 		t.Errorf("Expected: %v, Actual: %v", expected, *i.Value())
+	}
+}
+
+func TestInt_InterfaceValue(t *testing.T) {
+	var i Int
+	if !reflect.ValueOf(i.InterfaceValue()).IsNil() {
+		t.Errorf("Expected: nil, Actual: %v", i.InterfaceValue())
+	}
+	expected := 1
+	i.SetValue(expected)
+	if !reflect.DeepEqual(i.InterfaceValue(), &expected) {
+		t.Errorf("Expected: %v, Actual: %v", expected, i.InterfaceValue())
 	}
 }

@@ -193,7 +193,7 @@ func TestFloat64_IsNegative(t *testing.T) {
 }
 
 func TestFloat64_Value(t *testing.T) {
-	f := Float64{}
+	var f Float64
 	if f.Value() != nil {
 		t.Errorf("Expected: nil, Actual: %v", f.Value())
 	}
@@ -201,5 +201,17 @@ func TestFloat64_Value(t *testing.T) {
 	f.SetValue(expected)
 	if *f.Value() != expected {
 		t.Errorf("Expected: %v, Actual: %v", expected, *f.Value())
+	}
+}
+
+func TestFloat64_InterfaceValue(t *testing.T) {
+	var f Float64
+	if !reflect.ValueOf(f.InterfaceValue()).IsNil() {
+		t.Errorf("Expected: nil, Actual: %v", f.InterfaceValue())
+	}
+	expected := 1.5
+	f.SetValue(expected)
+	if !reflect.DeepEqual(f.InterfaceValue(), &expected) {
+		t.Errorf("Expected: %v, Actual: %v", expected, f.InterfaceValue())
 	}
 }

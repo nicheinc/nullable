@@ -125,3 +125,15 @@ func TestBool_Value(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, *b.Value())
 	}
 }
+
+func TestBool_InterfaceValue(t *testing.T) {
+	var b Bool
+	if !reflect.ValueOf(b.InterfaceValue()).IsNil() {
+		t.Errorf("Expected: nil, Actual: %v", b.InterfaceValue())
+	}
+	expected := true
+	b.SetValue(expected)
+	if !reflect.DeepEqual(b.InterfaceValue(), &expected) {
+		t.Errorf("Expected: %v, Actual: %v", expected, b.InterfaceValue())
+	}
+}

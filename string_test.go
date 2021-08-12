@@ -207,3 +207,15 @@ func TestString_Value(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, *s.Value())
 	}
 }
+
+func TestString_InterfaceValue(t *testing.T) {
+	var s String
+	if !reflect.ValueOf(s.InterfaceValue()).IsNil() {
+		t.Errorf("Expected: nil, Actual: %v", s.InterfaceValue())
+	}
+	expected := "value"
+	s.SetValue(expected)
+	if !reflect.DeepEqual(s.InterfaceValue(), &expected) {
+		t.Errorf("Expected: %v, Actual: %v", expected, s.InterfaceValue())
+	}
+}
