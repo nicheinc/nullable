@@ -90,8 +90,7 @@ implement a `MarshalJSON` for relevant types that simply calls
 ## Future Improvements
 
 Ideally we wouldn't have to maintain our own reflection-based marshalling code
-to solve this problem. There is
-[a proposal](https://github.com/nicheinc/entity/pull/120#discussion_r610908706)
+to solve this problem. There is [a proposal](https://github.com/golang/go/issues/11939)
 to add support for omitting zero-valued structs with `omitempty`. If this or a
 similar proposal were accepted, we could get rid of `nullable.MarshalJSON` and
 implement `MarshalJSON` and `IsZero` for the `Nullable` types.
