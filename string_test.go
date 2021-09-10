@@ -219,3 +219,19 @@ func TestString_InterfaceValue(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, s.InterfaceValue())
 	}
 }
+
+func TestString_String(t *testing.T) {
+	var s String
+	if s.String() != "<unset>" {
+		t.Errorf("Expected: <unset>, Actual: %v", s.String())
+	}
+	s.SetPtr(nil)
+	if s.String() != "<removed>" {
+		t.Errorf("Expected: <removed>, Actual: %v", s.String())
+	}
+	expected := "value"
+	s.SetValue(expected)
+	if s.String() != expected {
+		t.Errorf("Expected: %v, Actual: %v", expected, s.String())
+	}
+}
