@@ -60,3 +60,13 @@ func (s String) interfaceValue() interface{} {
 func (s String) IsEmpty() bool {
 	return s.set && s.value != nil && strings.TrimSpace(*s.value) == ""
 }
+
+func (s String) String() string {
+	if s.Removed() {
+		return "<removed>"
+	}
+	if !s.IsSet() {
+		return "<unset>"
+	}
+	return *s.Value()
+}
