@@ -27,36 +27,54 @@ func (i *Float64) SetValue(value float64) {
 	i.SetPtr(&value)
 }
 
-func (i *Float64) SetPtr(value *float64) {
-	i.set = true
-	i.value = value
+func (f *Float64) SetPtr(value *float64) {
+	f.set = true
+	f.value = value
 }
 
-func (i Float64) Value() *float64 {
-	return i.value
+func (f Float64) Value() *float64 {
+	return f.value
 }
 
-func (i *Float64) UnmarshalJSON(data []byte) error {
-	i.set = true
-	return json.Unmarshal(data, &i.value)
+func (f *Float64) UnmarshalJSON(data []byte) error {
+	f.set = true
+	return json.Unmarshal(data, &f.value)
 }
 
-func (i Float64) IsSet() bool {
-	return i.set
+func (f Float64) IsSet() bool {
+	return f.set
 }
 
-func (i Float64) Removed() bool {
-	return i.set && i.value == nil
+func (f Float64) Removed() bool {
+	return f.set && f.value == nil
 }
 
-func (i Float64) InterfaceValue() interface{} {
-	return i.value
+func (f Float64) InterfaceValue() interface{} {
+	return f.value
 }
 
-func (i Float64) IsZero() bool {
-	return i.set && i.value != nil && *i.value == 0.0
+func (f Float64) IsZero() bool {
+	return f.set && f.value != nil && *f.value == 0.0
 }
 
-func (i Float64) IsNegative() bool {
-	return i.set && i.value != nil && *i.value < 0.0
+func (f Float64) IsNegative() bool {
+	return f.set && f.value != nil && *f.value < 0.0
+}
+
+// Scan implements the sql.Scanner interface (https://pkg.go.dev/database/sql#Scanner).
+func (f *Float64) Scan(src interface{}) error {
+	switch value := src.(type) {
+	case nil:
+		f.SetPtr(nil)
+	case float64:
+		f.SetValue(value)
+	case int64:
+		f.SetValue(float64(value))
+	default:
+		return &ScanTypeError{
+			Src:  src,
+			Dest: f,
+		}
+	}
+	return nil
 }

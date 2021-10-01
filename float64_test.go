@@ -215,3 +215,53 @@ func TestFloat64_InterfaceValue(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, f.InterfaceValue())
 	}
 }
+
+func TestFloat64_Scan(t *testing.T) {
+	testCases := []struct {
+		name     string
+		dest     Float64
+		src      interface{}
+		expected Float64
+		err      error
+	}{
+		{
+			name: "ScanTypeError",
+			dest: Float64{},
+			src:  true,
+			err: &ScanTypeError{
+				Src:  true,
+				Dest: &Float64{},
+			},
+		},
+		{
+			name:     "Nil",
+			dest:     Float64{},
+			src:      nil,
+			expected: NewFloat64Ptr(nil),
+		},
+		{
+			name:     "Float64",
+			dest:     Float64{},
+			src:      1.5,
+			expected: NewFloat64(1.5),
+		},
+		{
+			name:     "Int64",
+			dest:     Float64{},
+			src:      int64(1),
+			expected: NewFloat64(1),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := testCase.dest.Scan(testCase.src)
+			if !reflect.DeepEqual(err, testCase.err) {
+				t.Errorf("Expected error: %v, Actual: %v", testCase.err, err)
+			}
+			if !reflect.DeepEqual(testCase.dest, testCase.expected) {
+				t.Errorf("Expected: %v, Actual: %v", testCase.expected, testCase.dest)
+			}
+		})
+	}
+}

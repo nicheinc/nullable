@@ -137,3 +137,47 @@ func TestBool_InterfaceValue(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, b.InterfaceValue())
 	}
 }
+
+func TestBool_Scan(t *testing.T) {
+	testCases := []struct {
+		name     string
+		dest     Bool
+		src      interface{}
+		expected Bool
+		err      error
+	}{
+		{
+			name: "ScanTypeError",
+			dest: Bool{},
+			src:  0,
+			err: &ScanTypeError{
+				Src:  0,
+				Dest: &Bool{},
+			},
+		},
+		{
+			name:     "Nil",
+			dest:     Bool{},
+			src:      nil,
+			expected: NewBoolPtr(nil),
+		},
+		{
+			name:     "Bool",
+			dest:     Bool{},
+			src:      true,
+			expected: NewBool(true),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := testCase.dest.Scan(testCase.src)
+			if !reflect.DeepEqual(err, testCase.err) {
+				t.Errorf("Expected error: %v, Actual: %v", testCase.err, err)
+			}
+			if !reflect.DeepEqual(testCase.dest, testCase.expected) {
+				t.Errorf("Expected: %v, Actual: %v", testCase.expected, testCase.dest)
+			}
+		})
+	}
+}

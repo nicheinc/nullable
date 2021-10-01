@@ -70,3 +70,21 @@ func (s String) String() string {
 	}
 	return *s.Value()
 }
+
+// Scan implements the sql.Scanner interface (https://pkg.go.dev/database/sql#Scanner).
+func (s *String) Scan(src interface{}) error {
+	switch value := src.(type) {
+	case nil:
+		s.SetPtr(nil)
+	case string:
+		s.SetValue(value)
+	case []byte:
+		s.SetValue(string(value))
+	default:
+		return &ScanTypeError{
+			Src:  src,
+			Dest: s,
+		}
+	}
+	return nil
+}

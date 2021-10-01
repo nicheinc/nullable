@@ -60,3 +60,19 @@ func (i Int) IsZero() bool {
 func (i Int) IsNegative() bool {
 	return i.set && i.value != nil && *i.value < 0
 }
+
+// Scan implements the sql.Scanner interface (https://pkg.go.dev/database/sql#Scanner).
+func (i *Int) Scan(src interface{}) error {
+	switch value := src.(type) {
+	case nil:
+		i.SetPtr(nil)
+	case int64:
+		i.SetValue(int(value))
+	default:
+		return &ScanTypeError{
+			Src:  src,
+			Dest: i,
+		}
+	}
+	return nil
+}

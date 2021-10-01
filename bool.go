@@ -52,3 +52,19 @@ func (b Bool) Removed() bool {
 func (b Bool) InterfaceValue() interface{} {
 	return b.value
 }
+
+// Scan implements the sql.Scanner interface (https://pkg.go.dev/database/sql#Scanner).
+func (b *Bool) Scan(src interface{}) error {
+	switch value := src.(type) {
+	case nil:
+		b.SetPtr(nil)
+	case bool:
+		b.SetValue(value)
+	default:
+		return &ScanTypeError{
+			Src:  src,
+			Dest: b,
+		}
+	}
+	return nil
+}

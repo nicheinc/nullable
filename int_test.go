@@ -215,3 +215,47 @@ func TestInt_InterfaceValue(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, i.InterfaceValue())
 	}
 }
+
+func TestInt_Scan(t *testing.T) {
+	testCases := []struct {
+		name     string
+		dest     Int
+		src      interface{}
+		expected Int
+		err      error
+	}{
+		{
+			name: "ScanTypeError",
+			dest: Int{},
+			src:  true,
+			err: &ScanTypeError{
+				Src:  true,
+				Dest: &Int{},
+			},
+		},
+		{
+			name:     "Nil",
+			dest:     Int{},
+			src:      nil,
+			expected: NewIntPtr(nil),
+		},
+		{
+			name:     "Int64",
+			dest:     Int{},
+			src:      int64(1),
+			expected: NewInt(1),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := testCase.dest.Scan(testCase.src)
+			if !reflect.DeepEqual(err, testCase.err) {
+				t.Errorf("Expected error: %v, Actual: %v", testCase.err, err)
+			}
+			if !reflect.DeepEqual(testCase.dest, testCase.expected) {
+				t.Errorf("Expected: %v, Actual: %v", testCase.expected, testCase.dest)
+			}
+		})
+	}
+}

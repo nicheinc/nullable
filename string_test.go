@@ -235,3 +235,47 @@ func TestString_String(t *testing.T) {
 		t.Errorf("Expected: %v, Actual: %v", expected, s.String())
 	}
 }
+
+func TestString_Scan(t *testing.T) {
+	testCases := []struct {
+		name     string
+		dest     String
+		src      interface{}
+		expected String
+		err      error
+	}{
+		{
+			name: "ScanTypeError",
+			dest: String{},
+			src:  true,
+			err: &ScanTypeError{
+				Src:  true,
+				Dest: &String{},
+			},
+		},
+		{
+			name:     "Nil",
+			dest:     String{},
+			src:      nil,
+			expected: NewStringPtr(nil),
+		},
+		{
+			name:     "String",
+			dest:     String{},
+			src:      "value",
+			expected: NewString("value"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := testCase.dest.Scan(testCase.src)
+			if !reflect.DeepEqual(err, testCase.err) {
+				t.Errorf("Expected error: %v, Actual: %v", testCase.err, err)
+			}
+			if !reflect.DeepEqual(testCase.dest, testCase.expected) {
+				t.Errorf("Expected: %v, Actual: %v", testCase.expected, testCase.dest)
+			}
+		})
+	}
+}
