@@ -37,7 +37,7 @@ func (s StringSlice) Removed() bool {
 	return s.set && s.value == nil
 }
 
-func (s StringSlice) interfaceValue() interface{} {
+func (s StringSlice) InterfaceValue() interface{} {
 	return s.value
 }
 

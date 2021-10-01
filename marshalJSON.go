@@ -70,7 +70,7 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 		case Nullable:
 			// Only marshal nullable fields that are explicitly set.
 			if field.IsSet() {
-				if err := appendField(field.interfaceValue()); err != nil {
+				if err := appendField(field.InterfaceValue()); err != nil {
 					return nil, err
 				}
 			}

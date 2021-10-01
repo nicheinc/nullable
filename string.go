@@ -52,7 +52,7 @@ func (s String) Removed() bool {
 	return s.set && s.value == nil
 }
 
-func (s String) interfaceValue() interface{} {
+func (s String) InterfaceValue() interface{} {
 	return s.value
 }
 
