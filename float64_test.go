@@ -311,6 +311,58 @@ func TestFloat64_ApplyPtr(t *testing.T) {
 	}
 }
 
+func TestFloat64_Diff(t *testing.T) {
+	var (
+		value1 = 1.5
+		value2 = 2.5
+	)
+	testCases := []struct {
+		name     string
+		f        Float64
+		value    float64
+		expected Float64
+	}{
+		{
+			name:     "Unset",
+			f:        Float64{},
+			value:    value1,
+			expected: Float64{},
+		},
+		{
+			name:     "Removed/NonZeroValue",
+			f:        NewFloat64Ptr(nil),
+			value:    value1,
+			expected: NewFloat64Ptr(nil),
+		},
+		{
+			name:     "Removed/ZeroValue",
+			f:        NewFloat64Ptr(nil),
+			value:    0.0,
+			expected: Float64{},
+		},
+		{
+			name:     "Set/Equal",
+			f:        NewFloat64(value1),
+			value:    value1,
+			expected: Float64{},
+		},
+		{
+			name:     "Set/NotEqual",
+			f:        NewFloat64(value2),
+			value:    value1,
+			expected: NewFloat64(value2),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.f.Diff(testCase.value); !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestFloat64_InterfaceValue(t *testing.T) {
 	var f Float64
 	if !reflect.ValueOf(f.InterfaceValue()).IsNil() {

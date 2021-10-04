@@ -233,6 +233,54 @@ func TestBool_ApplyPtr(t *testing.T) {
 	}
 }
 
+func TestBool_Diff(t *testing.T) {
+	testCases := []struct {
+		name     string
+		b        Bool
+		value    bool
+		expected Bool
+	}{
+		{
+			name:     "Unset",
+			b:        Bool{},
+			value:    true,
+			expected: Bool{},
+		},
+		{
+			name:     "Removed/NonZeroValue",
+			b:        NewBoolPtr(nil),
+			value:    true,
+			expected: NewBoolPtr(nil),
+		},
+		{
+			name:     "Removed/ZeroValue",
+			b:        NewBoolPtr(nil),
+			value:    false,
+			expected: Bool{},
+		},
+		{
+			name:     "Set/Equal",
+			b:        NewBool(true),
+			value:    true,
+			expected: Bool{},
+		},
+		{
+			name:     "Set/NotEqual",
+			b:        NewBool(true),
+			value:    false,
+			expected: NewBool(true),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.b.Diff(testCase.value); !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestBool_InterfaceValue(t *testing.T) {
 	var b Bool
 	if !reflect.ValueOf(b.InterfaceValue()).IsNil() {

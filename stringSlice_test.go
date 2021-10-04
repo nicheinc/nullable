@@ -270,6 +270,58 @@ func TestStringSlice_Apply(t *testing.T) {
 	}
 }
 
+func TestStringSlice_Diff(t *testing.T) {
+	var (
+		value1 = []string{"value1"}
+		value2 = []string{"value2"}
+	)
+	testCases := []struct {
+		name     string
+		s        StringSlice
+		value    []string
+		expected StringSlice
+	}{
+		{
+			name:     "Unset",
+			s:        StringSlice{},
+			value:    value1,
+			expected: StringSlice{},
+		},
+		{
+			name:     "Removed/NonZeroValue",
+			s:        NewStringSlice(nil),
+			value:    value1,
+			expected: NewStringSlice(nil),
+		},
+		{
+			name:     "Removed/ZeroValue",
+			s:        NewStringSlice(nil),
+			value:    nil,
+			expected: StringSlice{},
+		},
+		{
+			name:     "Set/Equal",
+			s:        NewStringSlice(value1),
+			value:    value1,
+			expected: StringSlice{},
+		},
+		{
+			name:     "Set/NotEqual",
+			s:        NewStringSlice(value2),
+			value:    value1,
+			expected: NewStringSlice(value2),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.s.Diff(testCase.value); !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestStringSlice_InterfaceValue(t *testing.T) {
 	var s StringSlice
 	if !reflect.ValueOf(s.InterfaceValue()).IsNil() {

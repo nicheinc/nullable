@@ -64,6 +64,15 @@ func (s String) ApplyPtr(value *string) *string {
 	return value
 }
 
+// Diff returns the "simplest" s2 such that s2.Apply(value) = s.Apply(value).
+// "Simplest" means that if possible, the result will be unset.
+func (s String) Diff(value string) String {
+	if s.Apply(value) == value {
+		return String{}
+	}
+	return s
+}
+
 func (s *String) UnmarshalJSON(data []byte) error {
 	s.set = true
 	return json.Unmarshal(data, &s.value)

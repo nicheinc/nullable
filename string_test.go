@@ -315,6 +315,58 @@ func TestString_ApplyPtr(t *testing.T) {
 	}
 }
 
+func TestString_Diff(t *testing.T) {
+	var (
+		value1 = "value1"
+		value2 = "value2"
+	)
+	testCases := []struct {
+		name     string
+		s        String
+		value    string
+		expected String
+	}{
+		{
+			name:     "Unset",
+			s:        String{},
+			value:    value1,
+			expected: String{},
+		},
+		{
+			name:     "Removed/NonZeroValue",
+			s:        NewStringPtr(nil),
+			value:    value1,
+			expected: NewStringPtr(nil),
+		},
+		{
+			name:     "Removed/ZeroValue",
+			s:        NewStringPtr(nil),
+			value:    "",
+			expected: String{},
+		},
+		{
+			name:     "Set/Equal",
+			s:        NewString(value1),
+			value:    value1,
+			expected: String{},
+		},
+		{
+			name:     "Set/NotEqual",
+			s:        NewString(value2),
+			value:    value1,
+			expected: NewString(value2),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.s.Diff(testCase.value); !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestString_InterfaceValue(t *testing.T) {
 	var s String
 	if !reflect.ValueOf(s.InterfaceValue()).IsNil() {

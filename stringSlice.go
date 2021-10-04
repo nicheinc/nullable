@@ -27,11 +27,18 @@ func (s StringSlice) Value() []string {
 // Equals returns whether s is set to a non-nil []string that is element-wise
 // equal to the given []string.
 func (s StringSlice) Equals(value []string) bool {
-	if s.value == nil || len(s.value) != len(value) {
+	if s.value == nil {
 		return false
 	}
-	for i := range s.value {
-		if s.value[i] != value[i] {
+	return stringSliceEquals(s.value, value)
+}
+
+func stringSliceEquals(slice1 []string, slice2 []string) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+	for i := range slice1 {
+		if slice1[i] != slice2[i] {
 			return false
 		}
 	}
@@ -45,6 +52,15 @@ func (s StringSlice) Apply(value []string) []string {
 		return value
 	}
 	return s.value
+}
+
+// Diff returns the "simplest" s2 such that s2.Apply(value) = s.Apply(value).
+// "Simplest" means that if possible, the result will be unset.
+func (s StringSlice) Diff(value []string) StringSlice {
+	if stringSliceEquals(s.Apply(value), value) {
+		return StringSlice{}
+	}
+	return s
 }
 
 func (s *StringSlice) UnmarshalJSON(data []byte) error {

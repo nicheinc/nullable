@@ -61,6 +61,15 @@ func (f Float64) ApplyPtr(value *float64) *float64 {
 	return value
 }
 
+// Diff returns the "simplest" f2 such that f2.Apply(value) = f.Apply(value).
+// "Simplest" means that if possible, the result will be unset.
+func (f Float64) Diff(value float64) Float64 {
+	if f.Apply(value) == value {
+		return Float64{}
+	}
+	return f
+}
+
 func (i *Float64) UnmarshalJSON(data []byte) error {
 	i.set = true
 	return json.Unmarshal(data, &i.value)

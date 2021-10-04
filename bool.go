@@ -61,6 +61,15 @@ func (b Bool) ApplyPtr(value *bool) *bool {
 	return value
 }
 
+// Diff returns the "simplest" b2 such that b2.Apply(value) = b.Apply(value).
+// "Simplest" means that if possible, the result will be unset.
+func (b Bool) Diff(value bool) Bool {
+	if b.Apply(value) == value {
+		return Bool{}
+	}
+	return b
+}
+
 func (b *Bool) UnmarshalJSON(data []byte) error {
 	b.set = true
 	return json.Unmarshal(data, &b.value)
