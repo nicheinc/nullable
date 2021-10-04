@@ -87,6 +87,14 @@ To avoid accidentally calling the default implementation, it may be prudent to
 implement a `MarshalJSON` for relevant types that simply calls
 `nullable.MarshalJSON`.
 
+## Scanning Values
+
+With the exception of `nullable.StringSlice`, all the `Nullable` types in this
+package implement the [`sql.Scanner`
+interface](https://pkg.go.dev/database/sql#Scanner). Note that scanning a `nil`
+value will _unset_ the receiver, not set it to removed; i.e. `IsSet` will return
+`false`, and `Value` will return `nil`.
+
 ## Future Improvements
 
 Ideally we wouldn't have to maintain our own reflection-based marshalling code
