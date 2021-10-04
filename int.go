@@ -65,7 +65,7 @@ func (i Int) IsNegative() bool {
 func (i *Int) Scan(src interface{}) error {
 	switch value := src.(type) {
 	case nil:
-		i.SetPtr(nil)
+		*i = Int{}
 	case int64:
 		i.SetValue(int(value))
 	default:

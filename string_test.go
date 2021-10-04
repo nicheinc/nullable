@@ -255,9 +255,9 @@ func TestString_Scan(t *testing.T) {
 		},
 		{
 			name:     "Nil",
-			dest:     String{},
+			dest:     NewString("value"),
 			src:      nil,
-			expected: NewStringPtr(nil),
+			expected: String{},
 		},
 		{
 			name:     "String",

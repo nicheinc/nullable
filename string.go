@@ -75,7 +75,7 @@ func (s String) String() string {
 func (s *String) Scan(src interface{}) error {
 	switch value := src.(type) {
 	case nil:
-		s.SetPtr(nil)
+		*s = String{}
 	case string:
 		s.SetValue(value)
 	case []byte:

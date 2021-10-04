@@ -65,7 +65,7 @@ func (f Float64) IsNegative() bool {
 func (f *Float64) Scan(src interface{}) error {
 	switch value := src.(type) {
 	case nil:
-		f.SetPtr(nil)
+		*f = Float64{}
 	case float64:
 		f.SetValue(value)
 	case int64:

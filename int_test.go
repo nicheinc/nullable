@@ -235,9 +235,9 @@ func TestInt_Scan(t *testing.T) {
 		},
 		{
 			name:     "Nil",
-			dest:     Int{},
+			dest:     NewInt(1),
 			src:      nil,
-			expected: NewIntPtr(nil),
+			expected: Int{},
 		},
 		{
 			name:     "Int64",

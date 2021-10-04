@@ -57,7 +57,7 @@ func (b Bool) InterfaceValue() interface{} {
 func (b *Bool) Scan(src interface{}) error {
 	switch value := src.(type) {
 	case nil:
-		b.SetPtr(nil)
+		*b = Bool{}
 	case bool:
 		b.SetValue(value)
 	default:

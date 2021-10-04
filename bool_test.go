@@ -157,9 +157,9 @@ func TestBool_Scan(t *testing.T) {
 		},
 		{
 			name:     "Nil",
-			dest:     Bool{},
+			dest:     NewBool(true),
 			src:      nil,
-			expected: NewBoolPtr(nil),
+			expected: Bool{},
 		},
 		{
 			name:     "Bool",

@@ -235,9 +235,9 @@ func TestFloat64_Scan(t *testing.T) {
 		},
 		{
 			name:     "Nil",
-			dest:     Float64{},
+			dest:     NewFloat64(1.5),
 			src:      nil,
-			expected: NewFloat64Ptr(nil),
+			expected: Float64{},
 		},
 		{
 			name:     "Float64",
