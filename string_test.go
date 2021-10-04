@@ -265,6 +265,12 @@ func TestString_Scan(t *testing.T) {
 			src:      "value",
 			expected: NewString("value"),
 		},
+		{
+			name:     "ByteSlice",
+			dest:     String{},
+			src:      []byte("value"),
+			expected: NewString("value"),
+		},
 	}
 
 	for _, testCase := range testCases {
