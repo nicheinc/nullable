@@ -43,6 +43,27 @@ func (s String) Equals(value string) bool {
 	return s.value != nil && *s.value == value
 }
 
+// Apply returns the given value, the zero value (""), or s's value, depending
+// on whether s is unset, removed, or set, respectively.
+func (s String) Apply(value string) string {
+	if !s.set {
+		return value
+	}
+	if s.value == nil {
+		return ""
+	}
+	return *s.value
+}
+
+// ApplyPtr returns the given value, nil, or s's value, depending on whether s
+// is unset, removed, or set, respectively.
+func (s String) ApplyPtr(value *string) *string {
+	if s.set {
+		return s.value
+	}
+	return value
+}
+
 func (s *String) UnmarshalJSON(data []byte) error {
 	s.set = true
 	return json.Unmarshal(data, &s.value)

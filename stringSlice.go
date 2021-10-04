@@ -38,6 +38,15 @@ func (s StringSlice) Equals(value []string) bool {
 	return true
 }
 
+// Apply returns the given value, the zero value (nil), or s's value, depending
+// on whether s is unset, removed, or set, respectively.
+func (s StringSlice) Apply(value []string) []string {
+	if !s.set {
+		return value
+	}
+	return s.value
+}
+
 func (s *StringSlice) UnmarshalJSON(data []byte) error {
 	s.set = true
 	return json.Unmarshal(data, &s.value)

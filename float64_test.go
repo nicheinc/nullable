@@ -235,8 +235,76 @@ func TestFloat64_Equals(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := testCase.f.Equals(value)
-			if actual != testCase.expected {
+			if actual := testCase.f.Equals(value); actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
+func TestFloat64_Apply(t *testing.T) {
+	value := 1.5
+	testCases := []struct {
+		name     string
+		f        Float64
+		expected float64
+	}{
+		{
+			name:     "Unset",
+			f:        Float64{},
+			expected: value,
+		},
+		{
+			name:     "Removed",
+			f:        NewFloat64Ptr(nil),
+			expected: 0,
+		},
+		{
+			name:     "Set",
+			f:        NewFloat64(value + 1),
+			expected: value + 1,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.f.Apply(value); actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
+func TestFloat64_ApplyPtr(t *testing.T) {
+	var (
+		value1 = 1.5
+		value2 = value1 + 1
+	)
+	testCases := []struct {
+		name     string
+		f        Float64
+		expected *float64
+	}{
+		{
+			name:     "Unset",
+			f:        Float64{},
+			expected: &value1,
+		},
+		{
+			name:     "Removed",
+			f:        NewFloat64Ptr(nil),
+			expected: nil,
+		},
+		{
+			name:     "Set",
+			f:        NewFloat64(value2),
+			expected: &value2,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.f.ApplyPtr(&value1); !reflect.DeepEqual(actual, testCase.expected) {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})

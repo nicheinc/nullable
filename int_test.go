@@ -235,8 +235,76 @@ func TestInt_Equals(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := testCase.i.Equals(value)
-			if actual != testCase.expected {
+			if actual := testCase.i.Equals(value); actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
+func TestInt_Apply(t *testing.T) {
+	value := 1
+	testCases := []struct {
+		name     string
+		i        Int
+		expected int
+	}{
+		{
+			name:     "Unset",
+			i:        Int{},
+			expected: value,
+		},
+		{
+			name:     "Removed",
+			i:        NewIntPtr(nil),
+			expected: 0,
+		},
+		{
+			name:     "Set",
+			i:        NewInt(value + 1),
+			expected: value + 1,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.i.Apply(value); actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
+func TestInt_ApplyPtr(t *testing.T) {
+	var (
+		value1 = 1
+		value2 = value1 + 1
+	)
+	testCases := []struct {
+		name     string
+		i        Int
+		expected *int
+	}{
+		{
+			name:     "Unset",
+			i:        Int{},
+			expected: &value1,
+		},
+		{
+			name:     "Removed",
+			i:        NewIntPtr(nil),
+			expected: nil,
+		},
+		{
+			name:     "Set",
+			i:        NewInt(value2),
+			expected: &value2,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.i.ApplyPtr(&value1); !reflect.DeepEqual(actual, testCase.expected) {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})

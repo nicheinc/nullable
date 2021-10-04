@@ -230,8 +230,40 @@ func TestStringSlice_Equals(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := testCase.s.Equals(testCase.value)
-			if actual != testCase.expected {
+			if actual := testCase.s.Equals(testCase.value); actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
+func TestStringSlice_Apply(t *testing.T) {
+	value := []string{"value"}
+	testCases := []struct {
+		name     string
+		s        StringSlice
+		expected []string
+	}{
+		{
+			name:     "Unset",
+			s:        StringSlice{},
+			expected: value,
+		},
+		{
+			name:     "Removed",
+			s:        NewStringSlice(nil),
+			expected: nil,
+		},
+		{
+			name:     "Set",
+			s:        NewStringSlice([]string{"value", "value"}),
+			expected: []string{"value", "value"},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.s.Apply(value); !reflect.DeepEqual(actual, testCase.expected) {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})

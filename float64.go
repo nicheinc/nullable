@@ -40,6 +40,27 @@ func (f Float64) Equals(value float64) bool {
 	return f.value != nil && *f.value == value
 }
 
+// Apply returns the given value, the zero value (0), or f's value, depending on
+// whether f is unset, removed, or set, respectively.
+func (f Float64) Apply(value float64) float64 {
+	if !f.set {
+		return value
+	}
+	if f.value == nil {
+		return 0
+	}
+	return *f.value
+}
+
+// ApplyPtr returns the given value, nil, or f's value, depending on whether f
+// is unset, removed, or set, respectively.
+func (f Float64) ApplyPtr(value *float64) *float64 {
+	if f.set {
+		return f.value
+	}
+	return value
+}
+
 func (i *Float64) UnmarshalJSON(data []byte) error {
 	i.set = true
 	return json.Unmarshal(data, &i.value)
