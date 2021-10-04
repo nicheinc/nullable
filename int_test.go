@@ -204,6 +204,45 @@ func TestInt_Value(t *testing.T) {
 	}
 }
 
+func TestInt_Equals(t *testing.T) {
+	value := 1
+	testCases := []struct {
+		name     string
+		i        Int
+		expected bool
+	}{
+		{
+			name:     "Unset",
+			i:        Int{},
+			expected: false,
+		},
+		{
+			name:     "Removed",
+			i:        NewIntPtr(nil),
+			expected: false,
+		},
+		{
+			name:     "Set/NotEqualValue",
+			i:        NewInt(value + 1),
+			expected: false,
+		},
+		{
+			name:     "Set/Equal",
+			i:        NewInt(value),
+			expected: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.i.Equals(value)
+			if actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestInt_InterfaceValue(t *testing.T) {
 	var i Int
 	if !reflect.ValueOf(i.InterfaceValue()).IsNil() {

@@ -126,6 +126,45 @@ func TestBool_Value(t *testing.T) {
 	}
 }
 
+func TestBool_Equals(t *testing.T) {
+	value := true
+	testCases := []struct {
+		name     string
+		b        Bool
+		expected bool
+	}{
+		{
+			name:     "Unset",
+			b:        Bool{},
+			expected: false,
+		},
+		{
+			name:     "Removed",
+			b:        NewBoolPtr(nil),
+			expected: false,
+		},
+		{
+			name:     "Set/NotEqual",
+			b:        NewBool(!value),
+			expected: false,
+		},
+		{
+			name:     "Set/Equal",
+			b:        NewBool(value),
+			expected: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.b.Equals(value)
+			if actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestBool_InterfaceValue(t *testing.T) {
 	var b Bool
 	if !reflect.ValueOf(b.InterfaceValue()).IsNil() {

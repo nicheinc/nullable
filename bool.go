@@ -36,6 +36,10 @@ func (b Bool) Value() *bool {
 	return b.value
 }
 
+func (b Bool) Equals(value bool) bool {
+	return b.value != nil && *b.value == value
+}
+
 func (b *Bool) UnmarshalJSON(data []byte) error {
 	b.set = true
 	return json.Unmarshal(data, &b.value)

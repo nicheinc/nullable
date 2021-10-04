@@ -208,6 +208,45 @@ func TestString_Value(t *testing.T) {
 	}
 }
 
+func TestString_Equals(t *testing.T) {
+	value := "value"
+	testCases := []struct {
+		name     string
+		s        String
+		expected bool
+	}{
+		{
+			name:     "Unset",
+			s:        String{},
+			expected: false,
+		},
+		{
+			name:     "Removed",
+			s:        NewStringPtr(nil),
+			expected: false,
+		},
+		{
+			name:     "Set/NotEqualValue",
+			s:        NewString(value + value),
+			expected: false,
+		},
+		{
+			name:     "Set/Equal",
+			s:        NewString(value),
+			expected: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.s.Equals(value)
+			if actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestString_InterfaceValue(t *testing.T) {
 	var s String
 	if !reflect.ValueOf(s.InterfaceValue()).IsNil() {

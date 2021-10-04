@@ -36,6 +36,10 @@ func (i Float64) Value() *float64 {
 	return i.value
 }
 
+func (f Float64) Equals(value float64) bool {
+	return f.value != nil && *f.value == value
+}
+
 func (i *Float64) UnmarshalJSON(data []byte) error {
 	i.set = true
 	return json.Unmarshal(data, &i.value)

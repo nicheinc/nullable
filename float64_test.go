@@ -204,6 +204,45 @@ func TestFloat64_Value(t *testing.T) {
 	}
 }
 
+func TestFloat64_Equals(t *testing.T) {
+	value := 1.5
+	testCases := []struct {
+		name     string
+		f        Float64
+		expected bool
+	}{
+		{
+			name:     "Unset",
+			f:        Float64{},
+			expected: false,
+		},
+		{
+			name:     "Removed",
+			f:        NewFloat64Ptr(nil),
+			expected: false,
+		},
+		{
+			name:     "Set/NotEqual",
+			f:        NewFloat64(value + 1),
+			expected: false,
+		},
+		{
+			name:     "Set/Equal",
+			f:        NewFloat64(value),
+			expected: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.f.Equals(value)
+			if actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestFloat64_InterfaceValue(t *testing.T) {
 	var f Float64
 	if !reflect.ValueOf(f.InterfaceValue()).IsNil() {

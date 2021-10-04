@@ -36,6 +36,10 @@ func (i Int) Value() *int {
 	return i.value
 }
 
+func (i Int) Equals(value int) bool {
+	return i.value != nil && *i.value == value
+}
+
 func (i *Int) UnmarshalJSON(data []byte) error {
 	i.set = true
 	return json.Unmarshal(data, &i.value)

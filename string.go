@@ -39,6 +39,10 @@ func (s String) Value() *string {
 	return s.value
 }
 
+func (s String) Equals(value string) bool {
+	return s.value != nil && *s.value == value
+}
+
 func (s *String) UnmarshalJSON(data []byte) error {
 	s.set = true
 	return json.Unmarshal(data, &s.value)
