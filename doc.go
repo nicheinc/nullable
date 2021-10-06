@@ -3,31 +3,6 @@ Package nullable provides types representing updates to struct fields,
 distinguishing between no-ops, removals, and modifications when marshalling
 updates to/from JSON.
 
-    type Update struct {
-        ID   int             `json:"-"`
-        Name nullable.String `json:"name"`
-        Flag nullable.Bool   `json:"flag"`
-    }
-
-    ...
-
-    out := Update {
-        ID:   1,
-        Name: nullable.NewString("Alice"),
-    }
-    data, err := nullable.MarshalJSON(&out)
-    // data: {"name":"Alice"}
-
-    out.Flag.SetPtr(nil)
-    data, err = nullable.MarshalJSON(&out)
-    // data: {"name":"Alice","flag":null}
-
-    in := Update{}
-    data = []byte(`{"flag":true}`)
-    err := json.Unmarshal(data, &in)
-    // in.Name.IsSet(): false
-    // *in.Flag.Value(): true
-
 Motivation
 
 It's often useful to define data updates using JSON objects, where each
