@@ -17,7 +17,7 @@ type Update struct {
 
 out := Update {
     ID:   1,
-    Name: nullable.MakeString("Alice"),
+    Name: nullable.NewString("Alice"),
 }
 data, err := nullable.MarshalJSON(&out)
 // data: {"name":"Alice"}
