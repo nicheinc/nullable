@@ -1,5 +1,11 @@
 # nullable
 
+[![Build Status](https://travis-ci.com/nicheinc/nullable.svg?branch=master)](https://travis-ci.com/nicheinc/nullable)
+[![Coverage Status](https://coveralls.io/repos/github/nicheinc/nullable/badge.svg?branch=main)](https://coveralls.io/github/nicheinc/nullable?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nicheinc/nullable)](https://goreportcard.com/report/github.com/nicheinc/nullable)
+[![Godoc](https://godoc.org/github.com/nicheinc/nullable?status.svg)](https://godoc.org/github.com/nicheinc/nullable) 
+[![license](https://img.shields.io/github/license/nicheinc/nullable.svg?cacheSeconds=2592000)](LICENSE)
+
 This package provides types representing updates to struct fields,
 distinguishing between no-ops, removals, and modifications when marshalling
 updates to/from JSON.
