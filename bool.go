@@ -2,6 +2,7 @@ package nullable
 
 import "encoding/json"
 
+// Bool implements Nullable for bool fields.
 type Bool struct {
 	set   bool
 	value *bool
@@ -23,19 +24,24 @@ func NewBoolPtr(v *bool) Bool {
 	}
 }
 
+// SetValue modifies the receiver to be an update to the given value.
 func (b *Bool) SetValue(value bool) {
 	b.SetPtr(&value)
 }
 
+// SetPtr modifies the receiver to be an update to the given value. If the value
+// is nil, the receiver will be removed.
 func (b *Bool) SetPtr(value *bool) {
 	b.set = true
 	b.value = value
 }
 
+// Value returns nil if the receiver is unset/removed or else the updated value.
 func (b Bool) Value() *bool {
 	return b.value
 }
 
+// Equals returns whether the receiver is set to the given value.
 func (b Bool) Equals(value bool) bool {
 	return b.value != nil && *b.value == value
 }
@@ -76,10 +82,12 @@ func (b *Bool) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &b.value)
 }
 
+// IsSet returns true if the receiver has been set/removed.
 func (b Bool) IsSet() bool {
 	return b.set
 }
 
+// Removed returns whether the receiver has been removed (value set to nil).
 func (b Bool) Removed() bool {
 	return b.set && b.value == nil
 }
