@@ -61,8 +61,9 @@ func (b Bool) ApplyPtr(value *bool) *bool {
 	return value
 }
 
-// Diff returns b if b.Apply(value) != value or else an unset Bool. This can be
-// used to avoid extraneous updates when the update would have no effect.
+// Diff returns b if b.Apply(value) != value; otherwise it returns an unset
+// Bool. This can be used to omit extraneous updates when applying the update
+// would have no effect.
 func (b Bool) Diff(value bool) Bool {
 	if b.Apply(value) == value {
 		return Bool{}

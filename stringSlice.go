@@ -54,9 +54,9 @@ func (s StringSlice) Apply(value []string) []string {
 	return s.value
 }
 
-// Diff returns s if s.Apply(value) is not pairwise equal to value or else an
-// unset StringSlice. This can be used to avoid extraneous updates when the
-// update would have no effect.
+// Diff returns s if s.Apply(value) is not pairwise equal to value; otherwise it
+// returns an unset StringSlice. This can be used to omit extraneous updates
+// when applying the update would have no effect.
 func (s StringSlice) Diff(value []string) StringSlice {
 	if stringSliceEquals(s.Apply(value), value) {
 		return StringSlice{}

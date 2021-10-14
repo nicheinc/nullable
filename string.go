@@ -64,8 +64,9 @@ func (s String) ApplyPtr(value *string) *string {
 	return value
 }
 
-// Diff returns s if s.Apply(value) != value or else an unset String. This can
-// be used to avoid extraneous updates when the update would have no effect.
+// Diff returns s if s.Apply(value) != value; otherwise it returns an unset
+// String. This can be used to omit extraneous updates when applying the update
+// would have no effect.
 func (s String) Diff(value string) String {
 	if s.Apply(value) == value {
 		return String{}

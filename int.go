@@ -61,8 +61,9 @@ func (i Int) ApplyPtr(value *int) *int {
 	return value
 }
 
-// Diff returns i if i.Apply(value) != value or else an unset Int. This can be
-// used to avoid extraneous updates when the update would have no effect.
+// Diff returns i if i.Apply(value) != value; otherwise it returns an unset Int.
+// This can be used to omit extraneous updates when applying the update would
+// have no effect.
 func (i Int) Diff(value int) Int {
 	if i.Apply(value) == value {
 		return Int{}
