@@ -64,8 +64,8 @@ func (s String) ApplyPtr(value *string) *string {
 	return value
 }
 
-// Diff returns the "simplest" s2 such that s2.Apply(value) = s.Apply(value).
-// "Simplest" means that if possible, the result will be unset.
+// Diff returns s if s.Apply(value) != value or else an unset String. This can
+// be used to avoid extraneous updates when the update would have no effect.
 func (s String) Diff(value string) String {
 	if s.Apply(value) == value {
 		return String{}

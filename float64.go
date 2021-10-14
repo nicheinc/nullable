@@ -61,8 +61,8 @@ func (f Float64) ApplyPtr(value *float64) *float64 {
 	return value
 }
 
-// Diff returns the "simplest" f2 such that f2.Apply(value) = f.Apply(value).
-// "Simplest" means that if possible, the result will be unset.
+// Diff returns f if f.Apply(value) != value or else an unset Float64. This can
+// be used to avoid extraneous updates when the update would have no effect.
 func (f Float64) Diff(value float64) Float64 {
 	if f.Apply(value) == value {
 		return Float64{}

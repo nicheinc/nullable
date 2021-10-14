@@ -54,8 +54,9 @@ func (s StringSlice) Apply(value []string) []string {
 	return s.value
 }
 
-// Diff returns the "simplest" s2 such that s2.Apply(value) = s.Apply(value).
-// "Simplest" means that if possible, the result will be unset.
+// Diff returns s if s.Apply(value) is not pairwise equal to value or else an
+// unset StringSlice. This can be used to avoid extraneous updates when the
+// update would have no effect.
 func (s StringSlice) Diff(value []string) StringSlice {
 	if stringSliceEquals(s.Apply(value), value) {
 		return StringSlice{}

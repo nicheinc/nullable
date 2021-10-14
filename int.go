@@ -61,8 +61,8 @@ func (i Int) ApplyPtr(value *int) *int {
 	return value
 }
 
-// Diff returns the "simplest" i2 such that i2.Apply(value) = i.Apply(value).
-// "Simplest" means that if possible, the result will be unset.
+// Diff returns i if i.Apply(value) != value or else an unset Int. This can be
+// used to avoid extraneous updates when the update would have no effect.
 func (i Int) Diff(value int) Int {
 	if i.Apply(value) == value {
 		return Int{}
