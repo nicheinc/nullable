@@ -1,6 +1,6 @@
 # nullable
 
-[![Build Status](https://travis-ci.com/nicheinc/nullable.svg?branch=master)](https://travis-ci.com/nicheinc/nullable)
+[![Build Status](https://github.com/nicheinc/nullable/actions/workflows/ci.yml/badge.svg)](https://github.com/nicheinc/nullable/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/nicheinc/nullable/badge.svg?branch=main)](https://coveralls.io/github/nicheinc/nullable?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nicheinc/nullable)](https://goreportcard.com/report/github.com/nicheinc/nullable)
 [![Godoc](https://godoc.org/github.com/nicheinc/nullable?status.svg)](https://godoc.org/github.com/nicheinc/nullable) 
