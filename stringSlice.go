@@ -24,6 +24,46 @@ func (s StringSlice) Value() []string {
 	return s.value
 }
 
+// Equals returns whether s is set to a non-nil []string that is element-wise
+// equal to the given []string.
+func (s StringSlice) Equals(value []string) bool {
+	if s.value == nil {
+		return false
+	}
+	return stringSliceEquals(s.value, value)
+}
+
+func stringSliceEquals(slice1 []string, slice2 []string) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+	for i := range slice1 {
+		if slice1[i] != slice2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// Apply returns the given value, the zero value (nil), or s's value, depending
+// on whether s is unset, removed, or set, respectively.
+func (s StringSlice) Apply(value []string) []string {
+	if !s.set {
+		return value
+	}
+	return s.value
+}
+
+// Diff returns s if s.Apply(value) is not pairwise equal to value; otherwise it
+// returns an unset StringSlice. This can be used to omit extraneous updates
+// when applying the update would have no effect.
+func (s StringSlice) Diff(value []string) StringSlice {
+	if stringSliceEquals(s.Apply(value), value) {
+		return StringSlice{}
+	}
+	return s
+}
+
 func (s *StringSlice) UnmarshalJSON(data []byte) error {
 	s.set = true
 	return json.Unmarshal(data, &s.value)

@@ -36,6 +36,41 @@ func (i Int) Value() *int {
 	return i.value
 }
 
+func (i Int) Equals(value int) bool {
+	return i.value != nil && *i.value == value
+}
+
+// Apply returns the given value, the zero value (0), or i's value, depending on
+// whether i is unset, removed, or set, respectively.
+func (i Int) Apply(value int) int {
+	if !i.set {
+		return value
+	}
+	if i.value == nil {
+		return 0
+	}
+	return *i.value
+}
+
+// ApplyPtr returns the given value, nil, or i's value, depending on whether i
+// is unset, removed, or set, respectively.
+func (i Int) ApplyPtr(value *int) *int {
+	if i.set {
+		return i.value
+	}
+	return value
+}
+
+// Diff returns i if i.Apply(value) != value; otherwise it returns an unset Int.
+// This can be used to omit extraneous updates when applying the update would
+// have no effect.
+func (i Int) Diff(value int) Int {
+	if i.Apply(value) == value {
+		return Int{}
+	}
+	return i
+}
+
 func (i *Int) UnmarshalJSON(data []byte) error {
 	i.set = true
 	return json.Unmarshal(data, &i.value)
