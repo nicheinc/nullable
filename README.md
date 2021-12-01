@@ -29,3 +29,14 @@ JSON output, i.e. removed.
 
 The `Nullable` field types distinguish between "unchanged" and "removed",
 allowing them to correctly and seamlessly unmarshal themselves from JSON.
+
+## Installation
+
+This package can be imported into a module-aware Go project as follows:
+
+`go get github.com/nicheinc/nullable`
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on contributing to
+`nullable`.
