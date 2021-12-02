@@ -170,7 +170,7 @@ func TestStringSlice_Value(t *testing.T) {
 	if s.Value() != nil {
 		t.Errorf("Expected: nil, Actual: %v", s.Value())
 	}
-	expected := []string{"value"}
+	expected := []string{testString}
 	s.SetValue(expected)
 	if !reflect.DeepEqual(s.Value(), expected) {
 		t.Errorf("Expected: %v, Actual: %v", expected, s.Value())
@@ -198,8 +198,8 @@ func TestStringSlice_Equals(t *testing.T) {
 		},
 		{
 			name:     "Set/NotEqual/DifferentSizes",
-			s:        NewStringSlice([]string{"value", "value"}),
-			value:    []string{"value"},
+			s:        NewStringSlice([]string{testString, testString}),
+			value:    []string{testString},
 			expected: false,
 		},
 		{
@@ -222,8 +222,8 @@ func TestStringSlice_Equals(t *testing.T) {
 		},
 		{
 			name:     "Set/Equal/Nonempty/Nonempty",
-			s:        NewStringSlice([]string{"value"}),
-			value:    []string{"value"},
+			s:        NewStringSlice([]string{testString}),
+			value:    []string{testString},
 			expected: true,
 		},
 	}
@@ -238,7 +238,7 @@ func TestStringSlice_Equals(t *testing.T) {
 }
 
 func TestStringSlice_Apply(t *testing.T) {
-	value := []string{"value"}
+	value := []string{testString}
 	testCases := []struct {
 		name     string
 		s        StringSlice
@@ -256,8 +256,8 @@ func TestStringSlice_Apply(t *testing.T) {
 		},
 		{
 			name:     "Set",
-			s:        NewStringSlice([]string{"value", "value"}),
-			expected: []string{"value", "value"},
+			s:        NewStringSlice([]string{testString, testString}),
+			expected: []string{testString, testString},
 		},
 	}
 
@@ -327,7 +327,7 @@ func TestStringSlice_InterfaceValue(t *testing.T) {
 	if !reflect.ValueOf(s.InterfaceValue()).IsNil() {
 		t.Errorf("Expected: nil, Actual: %v", s.InterfaceValue())
 	}
-	expected := []string{"value"}
+	expected := []string{testString}
 	s.SetValue(expected)
 	if !reflect.DeepEqual(s.InterfaceValue(), expected) {
 		t.Errorf("Expected: %v, Actual: %v", expected, s.InterfaceValue())

@@ -2,6 +2,7 @@ package nullable
 
 import "encoding/json"
 
+// StringSlice implements Nullable for []string fields.
 type StringSlice struct {
 	set   bool
 	value []string
@@ -15,11 +16,13 @@ func NewStringSlice(v []string) StringSlice {
 	}
 }
 
+// SetValue modifies the receiver to be an update to the given value.
 func (s *StringSlice) SetValue(value []string) {
 	s.set = true
 	s.value = value
 }
 
+// Value returns nil if the receiver is unset/removed or else the updated value.
 func (s StringSlice) Value() []string {
 	return s.value
 }
@@ -69,10 +72,12 @@ func (s *StringSlice) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &s.value)
 }
 
+// IsSet returns true if the receiver has been set/removed.
 func (s StringSlice) IsSet() bool {
 	return s.set
 }
 
+// Removed returns whether the receiver has been removed (value set to nil).
 func (s StringSlice) Removed() bool {
 	return s.set && s.value == nil
 }
@@ -81,6 +86,7 @@ func (s StringSlice) InterfaceValue() interface{} {
 	return s.value
 }
 
+// IsEmpty returns whether the receiver has been set to a non-nil empty slice.
 func (s *StringSlice) IsEmpty() bool {
 	return s.set && s.value != nil && len(s.value) == 0
 }

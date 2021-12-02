@@ -8,12 +8,14 @@ import (
 
 // MarshalJSON is a reimplementation of json.Marshal that understands Nullable
 // types. Any struct that contains Nullable fields should call this function
-// instead of the default json.Marshal. See the README for more detail.
+// instead of the default json.Marshal. See
+// https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling for more
+// info.
 func MarshalJSON(v interface{}) ([]byte, error) {
 	// This implementation only works on pointers. This is because to check
 	// whether each field implements Nullable, we need to take each field's
 	// address. But the reflected value of an interface containing a struct
-	// value is not addressable (see https://golang.org/pkg/reflect/#Value.CanAddr).
+	// value is not addressable (https://golang.org/pkg/reflect/#Value.CanAddr).
 	//
 	// The simplest workaround is if v is not already a pointer, marshal its
 	// address instead.
@@ -45,8 +47,8 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 			if err != nil {
 				return err
 			}
-			// Allocate space for the quoted key, a colon, and the value, as well
-			// as a leading comma if this isn't the first field marshalled.
+			// Allocate space for the quoted key, a colon, and the value, as
+			// well as a leading comma if this isn't the first field marshalled.
 			capacity := len(*key) + len(valueBuf) + 3
 			if prependComma {
 				capacity += 1

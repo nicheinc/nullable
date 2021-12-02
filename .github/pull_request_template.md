@@ -1,20 +1,10 @@
-<!--
-	Niche Back-End PR Template
-	Don't Forget:
-	- Add your PR to any relevant github boards
-	- Tag your PR with the BACK_END label
--->
+### Dependencies
 
-<!-- CC relevant team members -->
-
-### Depends On
-
-<!-- Does this PR depend on other PRs in the pipeline? Same service, other services, go-common etc.  If
-  it depends on other PRs within the same repository, link github diffs between these PRs for ease of review -->
+<!-- If this PR depends on other PRs in the pipeline, link GitHub diffs between them for ease of review. -->
 
 ### Documentation
 
-<!-- Link(s) to documentation relevant to the work, such as issues, wiki, tech debt cards, etc. -->
+<!-- Links to any documentation relevant to the work, such as an issue. -->
 
 ### Description
 
@@ -22,17 +12,7 @@
 
 ### Testing Considerations
 
-<!-- Any specific testing considerations for this PR: dependencies, sample UUIDs, test data etc.-->
-
-### SQL Migrations
-
-<!-- List any required SQL migrations with links to specific migration scripts.-->
-
-### Deployment 
-
-<!-- Any deployment considerations for this PR, including new service flags, dependencies, necessary order of operations etc. -->
-
-<!-- Does this PR represent a new back-end component that has never been deployed before? Consult the Production Readiness Checklist: https://docs.google.com/document/d/1MUjrz0m-zbTc4wmvxdmbCm6B2ML8fAluU7u9CqLSG9g/edit -->
+<!-- Any specific testing considerations for this PR. -->
 
 ### Versioning
 

@@ -1,103 +1,42 @@
 # nullable
 
-This package provides `Nullable` field types, which enable distinguishing
-between unset fields and fields explicitly set to null when marshalling to/from
-JSON.
+[![Build Status](https://github.com/nicheinc/nullable/actions/workflows/ci.yml/badge.svg)](https://github.com/nicheinc/nullable/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/nicheinc/nullable/badge.svg?branch=main)](https://coveralls.io/github/nicheinc/nullable?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nicheinc/nullable)](https://goreportcard.com/report/github.com/nicheinc/nullable)
+[![Godoc](https://godoc.org/github.com/nicheinc/nullable?status.svg)](https://godoc.org/github.com/nicheinc/nullable) 
+[![license](https://img.shields.io/github/license/nicheinc/nullable.svg?cacheSeconds=2592000)](LICENSE)
 
-## Example Usage
+This package provides types representing updates to struct fields,
+distinguishing between no-ops, removals, and modifications when marshalling
+updates to/from JSON.
 
-```go
-type Update struct {
-    ID   int             `json:"-"`
-    Name nullable.String `json:"name"`
-    Flag nullable.Bool   `json:"flag"`
-}
-
-...
-
-out := Update {
-    ID:   1,
-    Name: nullable.NewString("Alice"),
-}
-data, err := nullable.MarshalJSON(&out)
-// data: {"name":"Alice"}
-
-out.Flag.SetPtr(nil)
-data, err = nullable.MarshalJSON(&out)
-// data: {"name":"Alice","flag":null}
-
-in := Update{}
-data = []byte(`{"flag":true}`)
-err := json.Unmarshal(data, &in)
-// in.Name.IsSet(): false
-// *in.Flag.Value(): true
-```
+See [godoc](https://pkg.go.dev/github.com/nicheinc/nullable) for usage and
+examples.
 
 ## Motivation
 
-We define certain data updates using JSON objects, where each field in some
-structure can be updated according to the following rules:
-
-- If the field is present and non-`null`, the corresponding value is updated
-- If the field is present but `null`, the corresponding field is removed
-- If the field is absent, the corresponding value is left unmodified
-
-We want to define go structs (for example the
-[`EntityUpdate`](https://github.com/nicheinc/entity/blob/9c8bb0fe92e4e77e3af339c30b29fd122c190cd3/entity.go#L70-L78)
-type in the `entity` service) corresponding to these updates, which need to be
-marshalled to/from JSON.
+It's often useful to define data updates using JSON objects, where each
+key-value pair represents a field and its new value - using `null` to indicate
+deletion. If a certain key is not present, the corresponding field is not
+modified. We want to define go structs corresponding to these updates, which
+need to be marshalled to/from JSON.
 
 If we were to use pointer fields with the `omitempty` JSON struct tag option for
-these structs, then fields explicitly set to `nil` would simply be absent from
-the marshalled JSON. If we were to use pointer fields _without_ `omitempty`,
-then unset fields would be present and `null` in the JSON output.
+these structs, then fields explicitly set to `nil` to be removed would simply be
+absent from the marshalled JSON, i.e. unchanged. If we were to use pointer
+fields without `omitempty`, then unset fields would be present and `null` in the
+JSON output, i.e. removed.
 
-The `Nullable` field types distinguish between "set to `nil`" and "not set",
+The `Nullable` field types distinguish between "unchanged" and "removed",
 allowing them to correctly and seamlessly unmarshal themselves from JSON.
 
-## Marshalling
+## Installation
 
-Unfortunately, the default marshaller is unaware of our `Nullable` types, and
-providing a `MarshalJSON` implementation in the types themselves is
-insufficient because it's the containing struct that determines which field
-names appear in the JSON output. A custom implementation can use an ad-hoc
-struct mirroring the original struct (but with an extra level of indirection),
-along with a check per field that the field is set before copying it into the
-output struct, as seen
-[here](https://github.com/nicheinc/entity/blob/9c8bb0fe92e4e77e3af339c30b29fd122c190cd3/entity.go#L148-L167).
+This package can be imported into a module-aware Go project as follows:
 
-To avoid the need to define `MarshalJSON` for each struct containing `Nullable`
-fields, this package provides the `nullable.MarshalJSON` function, which
-implements a version of `json.Marshal` that respects the unset/removed status
-of `Nullable` types.
+`go get github.com/nicheinc/nullable`
 
-Aside from `Nullable` fields, `nullable.MarshalJSON` should behave exactly like
-[`json.Marshal`](https://golang.org/pkg/encoding/json/#Marshal), with the
-following exceptions:
+## Contributing
 
-- Anonymous fields are skipped
-- The `string` tag option is ignored
-
-Note that the `omitempty` option does not affect `Nullable` types. The default
-JSON marshaller never omits struct values, but `nullable.MarshalJSON` takes the
-use of a `Nullable` type as an indication to omit the field if it's unset, even
-if `omitempty` is absent.
-
-To avoid accidentally calling the default implementation, it may be prudent to
-implement a `MarshalJSON` for relevant types that simply calls
-`nullable.MarshalJSON`.
-
-## Future Improvements
-
-Ideally we wouldn't have to maintain our own reflection-based marshalling code
-to solve this problem. There is [a proposal](https://github.com/golang/go/issues/11939)
-to add support for omitting zero-valued structs with `omitempty`. If this or a
-similar proposal were accepted, we could get rid of `nullable.MarshalJSON` and
-implement `MarshalJSON` and `IsZero` for the `Nullable` types.
-
-There is also a lot of code duplication across `Nullable` types. Once generics
-are available, we can refactor the `Nullable` interface into a proper generic
-type. Note that currently `nullable.StringSlice` has a different interface from
-the other types because it stores a slice rather than a pointer, so we may
-actually want two generic types: one for value-like types and one for
-pointer-like types.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on contributing to
+`nullable`.
