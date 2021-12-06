@@ -77,6 +77,7 @@ func (i Int) Diff(value int) Int {
 	return i
 }
 
+// UnmarshalJSON implements json.Unmarshaler.
 func (i *Int) UnmarshalJSON(data []byte) error {
 	i.set = true
 	return json.Unmarshal(data, &i.value)
@@ -92,6 +93,7 @@ func (i Int) Removed() bool {
 	return i.set && i.value == nil
 }
 
+// InterfaceValue returns value as an interface{}.
 func (i Int) InterfaceValue() interface{} {
 	return i.value
 }

@@ -8,7 +8,7 @@ type Float64 struct {
 	value *float64
 }
 
-// NewInt returns a Float64 set to the given value.
+// NewFloat64 returns a Float64 set to the given value.
 func NewFloat64(v float64) Float64 {
 	return Float64{
 		set:   true,
@@ -16,7 +16,7 @@ func NewFloat64(v float64) Float64 {
 	}
 }
 
-// NewIntPtr returns a Float64 set to the given pointer.
+// NewFloat64Ptr returns a Float64 set to the given pointer.
 func NewFloat64Ptr(v *float64) Float64 {
 	return Float64{
 		set:   true,
@@ -25,20 +25,20 @@ func NewFloat64Ptr(v *float64) Float64 {
 }
 
 // SetValue modifies the receiver to be an update to the given value.
-func (i *Float64) SetValue(value float64) {
-	i.SetPtr(&value)
+func (f *Float64) SetValue(value float64) {
+	f.SetPtr(&value)
 }
 
 // SetPtr modifies the receiver to be an update to the given value. If the value
 // is nil, the receiver will be removed.
-func (i *Float64) SetPtr(value *float64) {
-	i.set = true
-	i.value = value
+func (f *Float64) SetPtr(value *float64) {
+	f.set = true
+	f.value = value
 }
 
 // Value returns nil if the receiver is unset/removed or else the updated value.
-func (i Float64) Value() *float64 {
-	return i.value
+func (f Float64) Value() *float64 {
+	return f.value
 }
 
 // Equals returns whether the receiver is set to the given value.
@@ -77,31 +77,33 @@ func (f Float64) Diff(value float64) Float64 {
 	return f
 }
 
-func (i *Float64) UnmarshalJSON(data []byte) error {
-	i.set = true
-	return json.Unmarshal(data, &i.value)
+// UnmarshalJSON implements json.Unmarshaler.
+func (f *Float64) UnmarshalJSON(data []byte) error {
+	f.set = true
+	return json.Unmarshal(data, &f.value)
 }
 
 // IsSet returns true if the receiver has been set/removed.
-func (i Float64) IsSet() bool {
-	return i.set
+func (f Float64) IsSet() bool {
+	return f.set
 }
 
 // Removed returns whether the receiver has been removed (value set to nil).
-func (i Float64) Removed() bool {
-	return i.set && i.value == nil
+func (f Float64) Removed() bool {
+	return f.set && f.value == nil
 }
 
-func (i Float64) InterfaceValue() interface{} {
-	return i.value
+// InterfaceValue returns value as an interface{}.
+func (f Float64) InterfaceValue() interface{} {
+	return f.value
 }
 
 // IsZero returns whether the receiver is set to 0.
-func (i Float64) IsZero() bool {
-	return i.set && i.value != nil && *i.value == 0.0
+func (f Float64) IsZero() bool {
+	return f.set && f.value != nil && *f.value == 0.0
 }
 
 // IsNegative returns whether the receiver is set to a negative value.
-func (i Float64) IsNegative() bool {
-	return i.set && i.value != nil && *i.value < 0.0
+func (f Float64) IsNegative() bool {
+	return f.set && f.value != nil && *f.value < 0.0
 }

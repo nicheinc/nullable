@@ -67,6 +67,7 @@ func (s StringSlice) Diff(value []string) StringSlice {
 	return s
 }
 
+// UnmarshalJSON implements json.Unmarshaler.
 func (s *StringSlice) UnmarshalJSON(data []byte) error {
 	s.set = true
 	return json.Unmarshal(data, &s.value)
@@ -82,6 +83,7 @@ func (s StringSlice) Removed() bool {
 	return s.set && s.value == nil
 }
 
+// InterfaceValue returns value as an interface{}.
 func (s StringSlice) InterfaceValue() interface{} {
 	return s.value
 }

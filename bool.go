@@ -77,6 +77,7 @@ func (b Bool) Diff(value bool) Bool {
 	return b
 }
 
+// UnmarshalJSON implements json.Unmarshaler.
 func (b *Bool) UnmarshalJSON(data []byte) error {
 	b.set = true
 	return json.Unmarshal(data, &b.value)
@@ -92,6 +93,7 @@ func (b Bool) Removed() bool {
 	return b.set && b.value == nil
 }
 
+// InterfaceValue returns value as an interface{}.
 func (b Bool) InterfaceValue() interface{} {
 	return b.value
 }
