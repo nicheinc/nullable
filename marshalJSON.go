@@ -51,7 +51,7 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 			// well as a leading comma if this isn't the first field marshalled.
 			capacity := len(*key) + len(valueBuf) + 3
 			if prependComma {
-				capacity += 1
+				capacity++
 			}
 			fieldBuf := make([]byte, 0, capacity)
 			// Append the components of the field data.
