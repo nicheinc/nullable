@@ -33,7 +33,7 @@ allowing them to correctly and seamlessly unmarshal themselves from JSON.
 
 This package can be imported into a module-aware Go project as follows:
 
-`go get github.com/nicheinc/nullable`
+`go get github.com/nicheinc/nullable/2`
 
 ## Contributing
 

@@ -103,29 +103,29 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			expected: `{"EmptyName":1}`,
 		},
 		{
-			name: "NullableInt/Unset",
+			name: "Update/Unset",
 			input: &struct {
-				Field Int
+				Field Update[int]
 			}{
-				Field: Int{},
+				Field: Update[int]{},
 			},
 			expected: `{}`,
 		},
 		{
-			name: "NullableInt/Removed",
+			name: "Update/Removed",
 			input: &struct {
-				Field Int
+				Field Update[int]
 			}{
-				Field: NewIntPtr(nil),
+				Field: NewUpdatePtr[int](nil),
 			},
 			expected: `{"Field":null}`,
 		},
 		{
-			name: "NullableInt/Set",
+			name: "Update/Set",
 			input: &struct {
-				Field Int
+				Field Update[int]
 			}{
-				Field: NewInt(1),
+				Field: NewUpdate(1),
 			},
 			expected: `{"Field":1}`,
 		},
@@ -161,7 +161,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			}
 			actual := string(data)
 			if actual != testCase.expected {
-				t.Errorf("Expected: %v, Actual: %v", testCase.expected, actual)
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
 	}
@@ -237,123 +237,51 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			},
 		},
 		{
-			name: "NullableInt/Unset",
+			name: "Update/Unset",
 			input: &struct {
-				Field Int
+				Field Update[int]
 			}{
-				Field: Int{},
+				Field: Update[int]{},
 			},
 		},
 		{
-			name: "NullableInt/Removed",
+			name: "Update/Removed",
 			input: &struct {
-				Field Int
+				Field Update[int]
 			}{
-				Field: NewIntPtr(nil),
+				Field: NewUpdatePtr[int](nil),
 			},
 		},
 		{
-			name: "NullableInt/Set",
+			name: "Update/Set",
 			input: &struct {
-				Field Int
+				Field Update[int]
 			}{
-				Field: NewInt(1),
+				Field: NewUpdate(1),
 			},
 		},
 		{
-			name: "NullableBool/Unset",
+			name: "SliceUpdate/Unset",
 			input: &struct {
-				Field Bool
+				Field SliceUpdate[int]
 			}{
-				Field: Bool{},
+				Field: SliceUpdate[int]{},
 			},
 		},
 		{
-			name: "NullableBool/Removed",
+			name: "SliceUpdate/Removed",
 			input: &struct {
-				Field Bool
+				Field SliceUpdate[int]
 			}{
-				Field: NewBoolPtr(nil),
+				Field: NewSliceUpdate[int](nil),
 			},
 		},
 		{
-			name: "NullableBool/Set",
+			name: "SliceUpdate/Set",
 			input: &struct {
-				Field Bool
+				Field SliceUpdate[int]
 			}{
-				Field: NewBool(true),
-			},
-		},
-		{
-			name: "NullableFloat64/Unset",
-			input: &struct {
-				Field Float64
-			}{
-				Field: Float64{},
-			},
-		},
-		{
-			name: "NullableFloat64/Removed",
-			input: &struct {
-				Field Float64
-			}{
-				Field: NewFloat64Ptr(nil),
-			},
-		},
-		{
-			name: "NullableFloat64/Set",
-			input: &struct {
-				Field Float64
-			}{
-				Field: NewFloat64(1.0),
-			},
-		},
-		{
-			name: "NullableString/Unset",
-			input: &struct {
-				Field String
-			}{
-				Field: String{},
-			},
-		},
-		{
-			name: "NullableString/Removed",
-			input: &struct {
-				Field String
-			}{
-				Field: NewStringPtr(nil),
-			},
-		},
-		{
-			name: "NullableString/Set",
-			input: &struct {
-				Field String
-			}{
-				Field: NewString(""),
-			},
-		},
-		{
-			name: "NullableStringSlice/Unset",
-			input: &struct {
-				Field StringSlice
-			}{
-				Field: StringSlice{},
-			},
-		},
-		{
-			name: "NullableStringSlice/Removed",
-			input: &struct {
-				Field StringSlice
-			}{
-				Field: NewStringSlice(nil),
-			},
-		},
-		{
-			name: "NullableStringSlice/Set",
-			input: &struct {
-				Field StringSlice
-			}{
-				Field: NewStringSlice([]string{}),
+				Field: NewSliceUpdate([]int{}),
 			},
 		},
 		{
@@ -375,7 +303,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			output := roundTrip(t, testCase.input)
 			// Marshalling then unmarshalling should result in the same value.
 			if !reflect.DeepEqual(testCase.input, output) {
-				t.Errorf("Expected: %v, Actual: %v", testCase.input, output)
+				t.Errorf("Expected: %v. Actual: %v", testCase.input, output)
 			}
 		})
 	}

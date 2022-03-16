@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/nicheinc/nullable"
+	"github.com/nicheinc/nullable/v2"
 )
 
 func Example() {
 	type Update struct {
-		ID   int             `json:"-"`
-		Name nullable.String `json:"name"`
-		Flag nullable.Bool   `json:"flag"`
+		ID   int                     `json:"-"`
+		Name nullable.Update[string] `json:"name"`
+		Flag nullable.Update[bool]   `json:"flag"`
 	}
 
 	// Fields are unset by default.
 	out := Update{
 		ID:   1,
-		Name: nullable.NewString("Alice"),
+		Name: nullable.NewUpdate("Alice"),
 	}
 	if data, err := nullable.MarshalJSON(&out); err == nil {
 		fmt.Println("Flag unset:", string(data))

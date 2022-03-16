@@ -69,10 +69,10 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 			return nil
 		}
 		switch field := fieldValue.Addr().Interface().(type) {
-		case Nullable:
-			// Only marshal nullable fields that are explicitly set.
-			if field.IsSet() {
-				if err := appendField(field.InterfaceValue()); err != nil {
+		case updateMarshaller:
+			// Only marshal update fields that are explicitly set/removed.
+			if field.include() {
+				if err := appendField(field.interfaceValue()); err != nil {
 					return nil, err
 				}
 			}
@@ -84,6 +84,14 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 	}
 	buf = append(buf, '}')
 	return buf, nil
+}
+
+type updateMarshaller interface {
+	// include returns whether the receiver should be marshalled
+	include() bool
+	// interfaceValue returns the (possibly nil) updated value as an interface{}
+	// suitable for marshalling structs.
+	interfaceValue() interface{}
 }
 
 // getKeyName tries to extract the marshalled key name from a struct field and
