@@ -321,12 +321,12 @@ func TestSliceUpdate_String(t *testing.T) {
 	}{
 		{
 			name:     "Noop",
-			u:        SliceUpdate[string]{},
+			u:        NewNoopSlice[int](),
 			expected: "<no-op>",
 		},
 		{
 			name:     "Remove",
-			u:        NewRemoveSlice[string](),
+			u:        NewRemoveSlice[int](),
 			expected: "<remove>",
 		},
 		{
