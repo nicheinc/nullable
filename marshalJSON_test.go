@@ -151,6 +151,51 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			},
 			expected: `{}`,
 		},
+		{
+			name: "NestedUpdate/Noop",
+			input: &struct {
+				Field struct {
+					NestedField Update[int]
+				}
+			}{
+				Field: struct {
+					NestedField Update[int]
+				}{
+					NestedField: Noop[int](),
+				},
+			},
+			expected: `{"Field":{}}`,
+		},
+		{
+			name: "NestedUpdate/Remove",
+			input: &struct {
+				Field struct {
+					NestedField Update[int]
+				}
+			}{
+				Field: struct {
+					NestedField Update[int]
+				}{
+					NestedField: Remove[int](),
+				},
+			},
+			expected: `{"Field":{"NestedField":null}}`,
+		},
+		{
+			name: "NestedUpdate/Set",
+			input: &struct {
+				Field struct {
+					NestedField Update[int]
+				}
+			}{
+				Field: struct {
+					NestedField Update[int]
+				}{
+					NestedField: Set(1),
+				},
+			},
+			expected: `{"Field":{"NestedField":1}}`,
+		},
 	}
 
 	for _, testCase := range testCases {

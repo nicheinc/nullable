@@ -11,18 +11,26 @@ import (
 // call this function instead of the default json.Marshal. For more info, see
 // https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling.
 func MarshalJSON(v interface{}) ([]byte, error) {
-	// This implementation only works on pointers. This is because to check
-	// whether each field implements updateMarshaller, we need to take each
-	// field's address. But the reflected value of an interface containing a
-	// struct value is not addressable
-	// (https://golang.org/pkg/reflect/#Value.CanAddr).
-	//
-	// The simplest workaround is if v is not already a pointer, marshal its
-	// address instead.
-	if reflect.TypeOf(v).Kind() != reflect.Ptr {
-		return MarshalJSON(&v)
+	// Marshal nil as null.
+	if v == nil {
+		return []byte("null"), nil
 	}
-	// Now that we know v is a pointer, get its element type.
+	// To check whether each field of a struct argument implements
+	// updateMarshaller, we need to take the address of its reflected field
+	// values. But the reflected struct values are not addressable
+	// (https://golang.org/pkg/reflect/#Value.CanAddr), so we need to ensure
+	// we're operating a pointer to a struct. Therefore, if v is not already a
+	// pointer, we marshal its address instead.
+	if reflect.TypeOf(v).Kind() != reflect.Ptr {
+		return marshalPtrJSON(&v)
+	}
+	return marshalPtrJSON(v)
+}
+
+// marshalPtrJSON implements most of the functionality of MarshalJSON. It
+// assumes its argument is a pointer.
+func marshalPtrJSON(v interface{}) ([]byte, error) {
+	// Since v is required to be a pointer, it's safe to get its element type.
 	reflectedType := reflect.TypeOf(v).Elem()
 	// Delegate non-struct values to the default implementation.
 	if reflectedType.Kind() != reflect.Struct {
@@ -43,7 +51,7 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 			continue
 		}
 		appendField := func(fieldInterface interface{}) error {
-			valueBuf, err := json.Marshal(fieldInterface)
+			valueBuf, err := MarshalJSON(fieldInterface)
 			if err != nil {
 				return err
 			}
