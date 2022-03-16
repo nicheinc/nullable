@@ -12,25 +12,25 @@ type SliceUpdate[T comparable] struct {
 	value []T
 }
 
-// NewNoopSlice returns an update that does nothing. This is equivalent to the
+// SliceNoop returns a slice update that does nothing. This is equivalent to the
 // zero-valued SliceUpdate.
-func NewNoopSlice[T comparable]() SliceUpdate[T] {
+func SliceNoop[T comparable]() SliceUpdate[T] {
 	return SliceUpdate[T]{
-		op: Noop,
+		op: OpNoop,
 	}
 }
 
-// NewRemoveSlice returns an update that removes a field (sets it to nil).
-func NewRemoveSlice[T comparable]() SliceUpdate[T] {
+// SliceRemove returns a slice update that removes a field (sets it to nil).
+func SliceRemove[T comparable]() SliceUpdate[T] {
 	return SliceUpdate[T]{
-		op: Remove,
+		op: OpRemove,
 	}
 }
 
-// NewSetSlice returns an update that sets a field's value to the given value.
-func NewSetSlice[T comparable](value []T) SliceUpdate[T] {
+// SliceSet returns a slice update that sets a field's value to the given value.
+func SliceSet[T comparable](value []T) SliceUpdate[T] {
 	return SliceUpdate[T]{
-		op:    Set,
+		op:    OpSet,
 		value: value,
 	}
 }
@@ -42,24 +42,24 @@ func (u SliceUpdate[T]) Operation() Operation {
 
 // IsNoop is shorthand for Operation() == Noop.
 func (u SliceUpdate[T]) IsNoop() bool {
-	return u.op == Noop
+	return u.op == OpNoop
 }
 
 // IsRemove is shorthand for Operation() == Remove.
 func (u SliceUpdate[T]) IsRemove() bool {
-	return u.op == Remove
+	return u.op == OpRemove
 }
 
 // IsSet is shorthand for Operation() == Set.
 func (u SliceUpdate[T]) IsSet() bool {
-	return u.op == Set
+	return u.op == OpSet
 }
 
 // Value returns the update's value and an "ok" flag indicating whether the
 // update is a set operation. If the flag is false (because the update is
 // actually a no-op or removal), then the returned value is nil.
 func (u SliceUpdate[T]) Value() (value []T, ok bool) {
-	return u.value, u.op == Set
+	return u.value, u.op == OpSet
 }
 
 // Apply returns the result of applying the update to the given value. The
@@ -67,9 +67,9 @@ func (u SliceUpdate[T]) Value() (value []T, ok bool) {
 // the update's contained value is if it's a set operation.
 func (u SliceUpdate[T]) Apply(value []T) []T {
 	switch u.op {
-	case Noop:
+	case OpNoop:
 		return value
-	case Remove:
+	case OpRemove:
 		return nil
 	default: // Set
 		return u.value
@@ -81,7 +81,7 @@ func (u SliceUpdate[T]) Apply(value []T) []T {
 // them would have no effect.
 func (u SliceUpdate[T]) Diff(value []T) SliceUpdate[T] {
 	if sliceEquals(u.Apply(value), value) {
-		return NewNoopSlice[T]()
+		return SliceNoop[T]()
 	}
 	return u
 }
@@ -89,16 +89,16 @@ func (u SliceUpdate[T]) Diff(value []T) SliceUpdate[T] {
 // UnmarshalJSON implements json.Unmarshaler.
 func (u *SliceUpdate[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		u.op = Remove
+		u.op = OpRemove
 		return nil
 	}
-	u.op = Set
+	u.op = OpSet
 	return json.Unmarshal(data, &u.value)
 }
 
 // IsSetTo returns whether the update set to the given value.
 func (u SliceUpdate[T]) IsSetTo(newValue []T) bool {
-	return u.op == Set && sliceEquals(u.value, newValue)
+	return u.op == OpSet && sliceEquals(u.value, newValue)
 }
 
 func sliceEquals[T comparable](slice1 []T, slice2 []T) bool {
@@ -116,16 +116,16 @@ func sliceEquals[T comparable](slice1 []T, slice2 []T) bool {
 // IsSetSuchThat returns whether the update is a set operation to a value that
 // satisfies the given predicate.
 func (u SliceUpdate[T]) IsSetSuchThat(predicate func([]T) bool) bool {
-	return u.op == Set && predicate(u.value)
+	return u.op == OpSet && predicate(u.value)
 }
 
 // String implements fmt.Stringer. It returns "<unset>", "<removed>", or a
 // string representation of the updated value.
 func (u SliceUpdate[T]) String() string {
 	switch u.op {
-	case Noop:
+	case OpNoop:
 		return "<no-op>"
-	case Remove:
+	case OpRemove:
 		return "<remove>"
 	}
 	return fmt.Sprintf("%v", u.value)
@@ -133,12 +133,12 @@ func (u SliceUpdate[T]) String() string {
 
 // shouldBeMarshalled partially implements updateMarshaller.
 func (u SliceUpdate[T]) shouldBeMarshalled() bool {
-	return u.op != Noop
+	return u.op != OpNoop
 }
 
 // interfaceValue partially implements updateMarshaller.
 func (u SliceUpdate[T]) interfaceValue() interface{} {
-	if u.op == Set {
+	if u.op == OpSet {
 		return u.value
 	}
 	return nil

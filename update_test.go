@@ -21,17 +21,17 @@ func TestUpdate_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "EmptyJSONObject",
 			json:     `{}`,
-			expected: NewNoop[int](),
+			expected: Noop[int](),
 		},
 		{
 			name:     "NullUpdate",
 			json:     `{"update": null}`,
-			expected: NewRemove[int](),
+			expected: Remove[int](),
 		},
 		{
 			name:     "ValueUpdate",
 			json:     fmt.Sprintf(`{"update": %v}`, testValue),
-			expected: NewSet(testValue),
+			expected: Set(testValue),
 		},
 	}
 
@@ -61,20 +61,20 @@ func TestUpdate_OperationAccessors(t *testing.T) {
 	}{
 		{
 			name:           "Noop",
-			update:         NewNoop[int](),
-			expectedOp:     Noop,
+			update:         Noop[int](),
+			expectedOp:     OpNoop,
 			expectedIsNoop: true,
 		},
 		{
 			name:             "Remove",
-			update:           NewRemove[int](),
-			expectedOp:       Remove,
+			update:           Remove[int](),
+			expectedOp:       OpRemove,
 			expectedIsRemove: true,
 		},
 		{
 			name:          "Set",
-			update:        NewSet(testValue),
-			expectedOp:    Set,
+			update:        Set(testValue),
+			expectedOp:    OpSet,
 			expectedIsSet: true,
 		},
 	}
@@ -112,19 +112,19 @@ func TestUpdate_Value(t *testing.T) {
 	}{
 		{
 			name:          "Noop",
-			update:        NewNoop[int](),
+			update:        Noop[int](),
 			expectedValue: 0,
 			expectedOK:    false,
 		},
 		{
 			name:          "Remove",
-			update:        NewRemove[int](),
+			update:        Remove[int](),
 			expectedValue: 0,
 			expectedOK:    false,
 		},
 		{
 			name:          "Set",
-			update:        NewSet(42),
+			update:        Set(42),
 			expectedValue: 42,
 			expectedOK:    true,
 		},
@@ -152,17 +152,17 @@ func TestUpdate_Apply(t *testing.T) {
 	}{
 		{
 			name:     "Noop",
-			update:   NewNoop[int](),
+			update:   Noop[int](),
 			expected: value,
 		},
 		{
 			name:     "Remove",
-			update:   NewRemove[int](),
+			update:   Remove[int](),
 			expected: 0,
 		},
 		{
 			name:     "Set",
-			update:   NewSet(value + 1),
+			update:   Set(value + 1),
 			expected: value + 1,
 		},
 	}
@@ -189,33 +189,33 @@ func TestUpdate_Diff(t *testing.T) {
 	}{
 		{
 			name:     "Noop",
-			update:   NewNoop[int](),
+			update:   Noop[int](),
 			value:    value1,
-			expected: NewNoop[int](),
+			expected: Noop[int](),
 		},
 		{
 			name:     "Remove/NonZeroValue",
-			update:   NewRemove[int](),
+			update:   Remove[int](),
 			value:    value1,
-			expected: NewRemove[int](),
+			expected: Remove[int](),
 		},
 		{
 			name:     "Remove/ZeroValue",
-			update:   NewRemove[int](),
+			update:   Remove[int](),
 			value:    0.0,
-			expected: NewNoop[int](),
+			expected: Noop[int](),
 		},
 		{
 			name:     "Set/Equal",
-			update:   NewSet(value1),
+			update:   Set(value1),
 			value:    value1,
-			expected: NewNoop[int](),
+			expected: Noop[int](),
 		},
 		{
 			name:     "Set/NotEqual",
-			update:   NewSet(value2),
+			update:   Set(value2),
 			value:    value1,
-			expected: NewSet(value2),
+			expected: Set(value2),
 		},
 	}
 
@@ -237,22 +237,22 @@ func TestUpdate_IsSetTo(t *testing.T) {
 	}{
 		{
 			name:     "Noop",
-			update:   NewNoop[int](),
+			update:   Noop[int](),
 			expected: false,
 		},
 		{
 			name:     "Remove",
-			update:   NewRemove[int](),
+			update:   Remove[int](),
 			expected: false,
 		},
 		{
 			name:     "Set/NotEqual",
-			update:   NewSet(value + 1),
+			update:   Set(value + 1),
 			expected: false,
 		},
 		{
 			name:     "Set/Equal",
-			update:   NewSet(value),
+			update:   Set(value),
 			expected: true,
 		},
 	}
@@ -277,22 +277,22 @@ func TestUpdate_IsSetSuchThat(t *testing.T) {
 	}{
 		{
 			name:     "Noop",
-			update:   NewNoop[int](),
+			update:   Noop[int](),
 			expected: false,
 		},
 		{
 			name:     "Remove",
-			update:   NewRemove[int](),
+			update:   Remove[int](),
 			expected: false,
 		},
 		{
 			name:     "Set/NotSatisfied",
-			update:   NewSet(1),
+			update:   Set(1),
 			expected: false,
 		},
 		{
 			name:     "Set/Satisfied",
-			update:   NewSet(-1),
+			update:   Set(-1),
 			expected: true,
 		},
 	}
@@ -314,27 +314,27 @@ func TestUpdate_String(t *testing.T) {
 	}{
 		{
 			name:     "Noop",
-			update:   NewNoop[int](),
+			update:   Noop[int](),
 			expected: "<no-op>",
 		},
 		{
 			name:     "Remove",
-			update:   NewRemove[int](),
+			update:   Remove[int](),
 			expected: "<remove>",
 		},
 		{
 			name:     "Set/Stringer",
-			update:   NewSet(stringer{}),
+			update:   Set(stringer{}),
 			expected: "stringer",
 		},
 		{
 			name:     "Set/String",
-			update:   NewSet("value"),
+			update:   Set("value"),
 			expected: "value",
 		},
 		{
 			name:     "Set/Int",
-			update:   NewSet(42),
+			update:   Set(42),
 			expected: "42",
 		},
 	}

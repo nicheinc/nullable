@@ -13,25 +13,25 @@ type Update[T comparable] struct {
 	value T
 }
 
-// NewNoop returns an update that does nothing. This is equivalent to the
+// Noop returns an update that does nothing. This is equivalent to the
 // zero-valued Update.
-func NewNoop[T comparable]() Update[T] {
+func Noop[T comparable]() Update[T] {
 	return Update[T]{
-		op: Noop,
+		op: OpNoop,
 	}
 }
 
-// NewRemove returns an update that removes a field (sets it to the zero value).
-func NewRemove[T comparable]() Update[T] {
+// Remove returns an update that removes a field (sets it to the zero value).
+func Remove[T comparable]() Update[T] {
 	return Update[T]{
-		op: Remove,
+		op: OpRemove,
 	}
 }
 
-// NewSet returns an update that sets a field's value to the given value.
-func NewSet[T comparable](value T) Update[T] {
+// Set returns an update that sets a field's value to the given value.
+func Set[T comparable](value T) Update[T] {
 	return Update[T]{
-		op:    Set,
+		op:    OpSet,
 		value: value,
 	}
 }
@@ -41,26 +41,26 @@ func (u Update[T]) Operation() Operation {
 	return u.op
 }
 
-// IsNoop is shorthand for Operation() == Noop.
+// IsNoop is shorthand for Operation() == OpNoop.
 func (u Update[T]) IsNoop() bool {
-	return u.op == Noop
+	return u.op == OpNoop
 }
 
-// IsRemove is shorthand for Operation() == Remove.
+// IsRemove is shorthand for Operation() == OpRemove.
 func (u Update[T]) IsRemove() bool {
-	return u.op == Remove
+	return u.op == OpRemove
 }
 
-// IsSet is shorthand for Operation() == Set.
+// IsSet is shorthand for Operation() == OpSet.
 func (u Update[T]) IsSet() bool {
-	return u.op == Set
+	return u.op == OpSet
 }
 
 // Value returns the update's value and an "ok" flag indicating whether the
 // update is a set operation. If the flag is false (because the update is
 // actually a no-op or removal), then the returned value is T's zero value.
 func (u Update[T]) Value() (value T, ok bool) {
-	return u.value, u.op == Set
+	return u.value, u.op == OpSet
 }
 
 // Apply returns the result of applying the update to the given value. The
@@ -68,9 +68,9 @@ func (u Update[T]) Value() (value T, ok bool) {
 // removal, or the update's contained value is if it's a set operation.
 func (u Update[T]) Apply(value T) T {
 	switch u.op {
-	case Noop:
+	case OpNoop:
 		return value
-	case Remove:
+	case OpRemove:
 		var zero T
 		return zero
 	default: // Set
@@ -83,7 +83,7 @@ func (u Update[T]) Apply(value T) T {
 // them would have no effect.
 func (u Update[T]) Diff(value T) Update[T] {
 	if u.Apply(value) == value {
-		return NewNoop[T]()
+		return Noop[T]()
 	}
 	return u
 }
@@ -91,31 +91,31 @@ func (u Update[T]) Diff(value T) Update[T] {
 // UnmarshalJSON implements json.Unmarshaler.
 func (u *Update[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		u.op = Remove
+		u.op = OpRemove
 		return nil
 	}
-	u.op = Set
+	u.op = OpSet
 	return json.Unmarshal(data, &u.value)
 }
 
 // IsSetTo returns whether the update sets to the given value.
 func (u Update[T]) IsSetTo(value T) bool {
-	return u.op == Set && u.value == value
+	return u.op == OpSet && u.value == value
 }
 
 // IsSetSuchThat returns whether the update is a set operation to a value that
 // satisfies the given predicate.
 func (u Update[T]) IsSetSuchThat(predicate func(T) bool) bool {
-	return u.op == Set && predicate(u.value)
+	return u.op == OpSet && predicate(u.value)
 }
 
 // String implements fmt.Stringer. It returns "<unset>", "<removed>", or a
 // string representation of the updated value.
 func (u Update[T]) String() string {
 	switch u.op {
-	case Noop:
+	case OpNoop:
 		return "<no-op>"
-	case Remove:
+	case OpRemove:
 		return "<remove>"
 	}
 	switch value := interface{}(u.value).(type) {
@@ -130,12 +130,12 @@ func (u Update[T]) String() string {
 
 // shouldBeMarshalled partially implements updateMarshaller.
 func (u Update[T]) shouldBeMarshalled() bool {
-	return u.op != Noop
+	return u.op != OpNoop
 }
 
 // interfaceValue partially implements updateMarshaller.
 func (u Update[T]) interfaceValue() interface{} {
-	if u.op == Set {
+	if u.op == OpSet {
 		return u.value
 	}
 	return nil

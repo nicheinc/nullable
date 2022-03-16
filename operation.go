@@ -1,23 +1,23 @@
 package nullable
 
-// Operation represents the operation that an update performs. The Noop, Remove,
-// and Set constants are the only valid values of this type.
+// Operation represents the operation that an update performs. The OpNoop,
+// OpRemove, and OpSet constants are the only valid values of this type.
 type Operation byte
 
 const (
-	// Noop indicates that an update does nothing.
-	Noop Operation = iota
-	// Remove indicates that an update removes a field.
-	Remove
-	// Set indicates that an update sets a field's value.
-	Set
+	// OpNoop indicates that an update does nothing.
+	OpNoop Operation = iota
+	// OpRemove indicates that an update removes a field.
+	OpRemove
+	// OpSet indicates that an update sets a field's value.
+	OpSet
 )
 
 func (o Operation) String() string {
 	switch o {
-	case Noop:
+	case OpNoop:
 		return "no-op"
-	case Remove:
+	case OpRemove:
 		return "remove"
 	default: // Set
 		return "set"

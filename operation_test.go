@@ -10,17 +10,17 @@ func TestOperation_String(t *testing.T) {
 	}{
 		{
 			name:     "Noop",
-			op:       Noop,
+			op:       OpNoop,
 			expected: "no-op",
 		},
 		{
 			name:     "Remove",
-			op:       Remove,
+			op:       OpRemove,
 			expected: "remove",
 		},
 		{
 			name:     "Set",
-			op:       Set,
+			op:       OpSet,
 			expected: "set",
 		},
 	}

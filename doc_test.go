@@ -17,14 +17,14 @@ func Example() {
 	// Update fields are no-ops by default and excluded from JSON.
 	out := Update{
 		ID:   1,
-		Name: nullable.NewSet("Alice"),
+		Name: nullable.Set("Alice"),
 	}
 	if data, err := nullable.MarshalJSON(&out); err == nil {
 		fmt.Println("With Flag unset:", string(data))
 	}
 
 	// Removal operations are marshalled with explicit null values.
-	out.Flag = nullable.NewRemove[bool]()
+	out.Flag = nullable.Remove[bool]()
 	if data, err := nullable.MarshalJSON(&out); err == nil {
 		fmt.Println("With Flag removed:", string(data))
 	}
