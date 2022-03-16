@@ -5,115 +5,120 @@ import (
 	"fmt"
 )
 
-// Update represents an update to a value. The update may represent a null
-// update, a removal, or a change in value.
+// Update represents an update that can be applied to a value field. It may set,
+// remove, or have no effect on a field's value. For updates to slice fields,
+// see SliceUpdate.
 type Update[T comparable] struct {
-	set   bool
-	value *T
+	op    Operation
+	value T
 }
 
-// NewUpdate returns an Update set to the given value.
-func NewUpdate[T comparable](value T) Update[T] {
+// NewNoop returns an update that does nothing. This is equivalent to the
+// zero-valued Update.
+func NewNoop[T comparable]() Update[T] {
 	return Update[T]{
-		set:   true,
-		value: &value,
+		op: Noop,
 	}
 }
 
-// NewUpdatePtr returns an Update set to the given pointer.
-func NewUpdatePtr[T comparable](value *T) Update[T] {
+// NewRemove returns an update that removes a field (sets it to the zero value).
+func NewRemove[T comparable]() Update[T] {
 	return Update[T]{
-		set:   true,
+		op: Remove,
+	}
+}
+
+// NewSet returns an update that sets a field's value to the given value.
+func NewSet[T comparable](value T) Update[T] {
+	return Update[T]{
+		op:    Set,
 		value: value,
 	}
 }
 
-// SetValue modifies the receiver to be an update to the given value.
-func (u *Update[T]) SetValue(value T) {
-	u.SetPtr(&value)
+// Operation returns the operation this update performs: no-op, remove, or set.
+func (u Update[T]) Operation() Operation {
+	return u.op
 }
 
-// SetPtr modifies the receiver to be an update to the given value. If the value
-// is nil, the receiver will be removed.
-func (u *Update[T]) SetPtr(value *T) {
-	u.set = true
-	u.value = value
+// IsNoop is shorthand for Operation() == Noop.
+func (u Update[T]) IsNoop() bool {
+	return u.op == Noop
 }
 
-// Value returns nil if the receiver is unset/removed or else the updated value.
-func (u Update[T]) Value() *T {
-	return u.value
+// IsRemove is shorthand for Operation() == Remove.
+func (u Update[T]) IsRemove() bool {
+	return u.op == Remove
 }
 
-// Apply returns the given value, the zero value of T, or the receiver's value,
-// depending on whether the receiver is unset, removed, or set, respectively.
+// IsSet is shorthand for Operation() == Set.
+func (u Update[T]) IsSet() bool {
+	return u.op == Set
+}
+
+// Value returns the update's value and an "ok" flag indicating whether the
+// update is a set operation. If the flag is false (because the update is
+// actually a no-op or removal), then the returned value is T's zero value.
+func (u Update[T]) Value() (value T, ok bool) {
+	return u.value, u.op == Set
+}
+
+// Apply returns the result of applying the update to the given value. The
+// result is the given value if the update is a no-op, the zero value if it's a
+// removal, or the update's contained value is if it's a set operation.
 func (u Update[T]) Apply(value T) T {
-	if !u.set {
+	switch u.op {
+	case Noop:
 		return value
-	}
-	if u.value == nil {
-		var zeroValue T
-		return zeroValue
-	}
-	return *u.value
-}
-
-// ApplyPtr returns the given value, nil, or the receiver's value, depending on
-// whether the receiver is unset, removed, or set, respectively.
-func (u Update[T]) ApplyPtr(value *T) *T {
-	if u.set {
+	case Remove:
+		var zero T
+		return zero
+	default: // Set
 		return u.value
 	}
-	return value
 }
 
-// Diff returns the update u if u.Apply(value) != value; otherwise it returns an
-// unset update. This can be used to omit extraneous updates when applying the
-// update would have no effect.
+// Diff returns the update itself if Apply(value) != value; otherwise it returns
+// a no-op update. Diff can be used to omit extraneous updates when applying
+// them would have no effect.
 func (u Update[T]) Diff(value T) Update[T] {
 	if u.Apply(value) == value {
-		return Update[T]{}
+		return NewNoop[T]()
 	}
 	return u
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
 func (u *Update[T]) UnmarshalJSON(data []byte) error {
-	u.set = true
+	if string(data) == "null" {
+		u.op = Remove
+		return nil
+	}
+	u.op = Set
 	return json.Unmarshal(data, &u.value)
 }
 
-// IsSet returns true if the receiver has been set/removed.
-func (u Update[T]) IsSet() bool {
-	return u.set
+// IsSetTo returns whether the update sets to the given value.
+func (u Update[T]) IsSetTo(value T) bool {
+	return u.op == Set && u.value == value
 }
 
-// Removed returns whether the receiver has been removed (value set to nil).
-func (u Update[T]) Removed() bool {
-	return u.set && u.value == nil
-}
-
-// IsSetTo returns whether the update is a change to the given new value.
-func (u Update[T]) IsSetTo(newValue T) bool {
-	return u.value != nil && *u.value == newValue
-}
-
-// IsSetSuchThat returns whether the update is a change whose new value
+// IsSetSuchThat returns whether the update is a set operation to a value that
 // satisfies the given predicate.
 func (u Update[T]) IsSetSuchThat(predicate func(T) bool) bool {
-	return u.value != nil && predicate(*u.value)
+	return u.op == Set && predicate(u.value)
 }
 
 // String implements fmt.Stringer. It returns "<unset>", "<removed>", or a
 // string representation of the updated value.
 func (u Update[T]) String() string {
-	if u.Removed() {
-		return "<removed>"
+	switch u.op {
+	case Noop:
+		return "<no-op>"
+	case Remove:
+		return "<remove>"
 	}
-	if !u.IsSet() {
-		return "<unset>"
-	}
-	switch value := interface{}(*u.value).(type) {
+	switch value := interface{}(u.value).(type) {
 	case string:
 		return value
 	case fmt.Stringer:
@@ -123,12 +128,15 @@ func (u Update[T]) String() string {
 	}
 }
 
-// include partially implements updateMarshaller.
-func (u Update[T]) include() bool {
-	return u.set
+// shouldBeMarshalled partially implements updateMarshaller.
+func (u Update[T]) shouldBeMarshalled() bool {
+	return u.op != Noop
 }
 
 // interfaceValue partially implements updateMarshaller.
 func (u Update[T]) interfaceValue() interface{} {
-	return u.value
+	if u.op == Set {
+		return u.value
+	}
+	return nil
 }

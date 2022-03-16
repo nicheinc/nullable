@@ -21,17 +21,17 @@ func TestUpdate_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "EmptyJSONObject",
 			json:     `{}`,
-			expected: Update[int]{},
+			expected: NewNoop[int](),
 		},
 		{
 			name:     "NullUpdate",
 			json:     `{"update": null}`,
-			expected: NewUpdatePtr[int](nil),
+			expected: NewRemove[int](),
 		},
 		{
 			name:     "ValueUpdate",
 			json:     fmt.Sprintf(`{"update": %v}`, testValue),
-			expected: NewUpdate(testValue),
+			expected: NewSet(testValue),
 		},
 	}
 
@@ -50,81 +50,96 @@ func TestUpdate_UnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestUpdate_SetValue(t *testing.T) {
+func TestUpdate_OperationAccessors(t *testing.T) {
 	testCases := []struct {
-		name     string
-		value    *int
-		expected Update[int]
+		name             string
+		update           Update[int]
+		expectedOp       Operation
+		expectedIsNoop   bool
+		expectedIsRemove bool
+		expectedIsSet    bool
 	}{
 		{
-			name:     "NullUpdate",
-			value:    nil,
-			expected: NewUpdatePtr[int](nil),
+			name:           "Noop",
+			update:         NewNoop[int](),
+			expectedOp:     Noop,
+			expectedIsNoop: true,
 		},
 		{
-			name:     "ValueUpdate",
-			value:    &testValue,
-			expected: NewUpdate(testValue),
+			name:             "Remove",
+			update:           NewRemove[int](),
+			expectedOp:       Remove,
+			expectedIsRemove: true,
+		},
+		{
+			name:          "Set",
+			update:        NewSet(testValue),
+			expectedOp:    Set,
+			expectedIsSet: true,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := Update[int]{}
-			if testCase.value != nil {
-				actual.SetValue(*testCase.value)
-			} else {
-				actual.SetPtr(nil)
+			var (
+				op       = testCase.update.Operation()
+				isNoop   = testCase.update.IsNoop()
+				isRemove = testCase.update.IsRemove()
+				isSet    = testCase.update.IsSet()
+			)
+			if op != testCase.expectedOp {
+				t.Errorf("Expected Operation(): %v. Actual: %v", testCase.expectedOp, op)
 			}
-			if !reflect.DeepEqual(actual, testCase.expected) {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			if isNoop != testCase.expectedIsNoop {
+				t.Errorf("Expected IsNoop(): %v. Actual: %v", testCase.expectedIsNoop, isNoop)
 			}
-		})
-	}
-}
-
-func TestUpdate_Removed(t *testing.T) {
-	testCases := []struct {
-		name     string
-		u        Update[int]
-		expected bool
-	}{
-		{
-			name:     "NotSet",
-			u:        Update[int]{},
-			expected: false,
-		},
-		{
-			name:     "NullUpdate",
-			u:        NewUpdatePtr[int](nil),
-			expected: true,
-		},
-		{
-			name:     "ValueUpdate",
-			u:        NewUpdate(testValue),
-			expected: false,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			actual := testCase.u.Removed()
-			if !reflect.DeepEqual(actual, testCase.expected) {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			if isRemove != testCase.expectedIsRemove {
+				t.Errorf("Expected IsRemove(): %v. Actual: %v", testCase.expectedIsRemove, isRemove)
+			}
+			if isSet != testCase.expectedIsSet {
+				t.Errorf("Expected IsSet(): %v. Actual: %v", testCase.expectedIsSet, isSet)
 			}
 		})
 	}
 }
 
 func TestUpdate_Value(t *testing.T) {
-	var u Update[int]
-	if u.Value() != nil {
-		t.Errorf("Expected: nil. Actual: %v", u.Value())
+	testCases := []struct {
+		name          string
+		update        Update[int]
+		expectedValue int
+		expectedOK    bool
+	}{
+		{
+			name:          "Noop",
+			update:        NewNoop[int](),
+			expectedValue: 0,
+			expectedOK:    false,
+		},
+		{
+			name:          "Remove",
+			update:        NewRemove[int](),
+			expectedValue: 0,
+			expectedOK:    false,
+		},
+		{
+			name:          "Set",
+			update:        NewSet(42),
+			expectedValue: 42,
+			expectedOK:    true,
+		},
 	}
-	expected := 1
-	u.SetValue(expected)
-	if *u.Value() != expected {
-		t.Errorf("Expected: %v. Actual: %v", expected, *u.Value())
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			value, ok := testCase.update.Value()
+			if value != testCase.expectedValue {
+				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, value)
+			}
+			if ok != testCase.expectedOK {
+				t.Errorf("Expected ok: %v. Actual: %v", testCase.expectedOK, ok)
+			}
+		})
 	}
 }
 
@@ -132,65 +147,29 @@ func TestUpdate_Apply(t *testing.T) {
 	value := 1
 	testCases := []struct {
 		name     string
-		u        Update[int]
+		update   Update[int]
 		expected int
 	}{
 		{
-			name:     "Unset",
-			u:        Update[int]{},
+			name:     "Noop",
+			update:   NewNoop[int](),
 			expected: value,
 		},
 		{
-			name:     "Removed",
-			u:        NewUpdatePtr[int](nil),
+			name:     "Remove",
+			update:   NewRemove[int](),
 			expected: 0,
 		},
 		{
 			name:     "Set",
-			u:        NewUpdate(value + 1),
+			update:   NewSet(value + 1),
 			expected: value + 1,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.u.Apply(value); actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
-		})
-	}
-}
-
-func TestUpdate_ApplyPtr(t *testing.T) {
-	var (
-		value1 = 1
-		value2 = value1 + 1
-	)
-	testCases := []struct {
-		name     string
-		u        Update[int]
-		expected *int
-	}{
-		{
-			name:     "Unset",
-			u:        Update[int]{},
-			expected: &value1,
-		},
-		{
-			name:     "Removed",
-			u:        NewUpdatePtr[int](nil),
-			expected: nil,
-		},
-		{
-			name:     "Set",
-			u:        NewUpdate(value2),
-			expected: &value2,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.u.ApplyPtr(&value1); !reflect.DeepEqual(actual, testCase.expected) {
+			if actual := testCase.update.Apply(value); actual != testCase.expected {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
@@ -204,45 +183,45 @@ func TestUpdate_Diff(t *testing.T) {
 	)
 	testCases := []struct {
 		name     string
-		u        Update[int]
+		update   Update[int]
 		value    int
 		expected Update[int]
 	}{
 		{
-			name:     "Unset",
-			u:        Update[int]{},
+			name:     "Noop",
+			update:   NewNoop[int](),
 			value:    value1,
-			expected: Update[int]{},
+			expected: NewNoop[int](),
 		},
 		{
-			name:     "Removed/NonZeroValue",
-			u:        NewUpdatePtr[int](nil),
+			name:     "Remove/NonZeroValue",
+			update:   NewRemove[int](),
 			value:    value1,
-			expected: NewUpdatePtr[int](nil),
+			expected: NewRemove[int](),
 		},
 		{
-			name:     "Removed/ZeroValue",
-			u:        NewUpdatePtr[int](nil),
+			name:     "Remove/ZeroValue",
+			update:   NewRemove[int](),
 			value:    0.0,
-			expected: Update[int]{},
+			expected: NewNoop[int](),
 		},
 		{
 			name:     "Set/Equal",
-			u:        NewUpdate(value1),
+			update:   NewSet(value1),
 			value:    value1,
-			expected: Update[int]{},
+			expected: NewNoop[int](),
 		},
 		{
 			name:     "Set/NotEqual",
-			u:        NewUpdate(value2),
+			update:   NewSet(value2),
 			value:    value1,
-			expected: NewUpdate(value2),
+			expected: NewSet(value2),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.u.Diff(testCase.value); !reflect.DeepEqual(actual, testCase.expected) {
+			if actual := testCase.update.Diff(testCase.value); !reflect.DeepEqual(actual, testCase.expected) {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
@@ -253,34 +232,34 @@ func TestUpdate_IsSetTo(t *testing.T) {
 	value := 1
 	testCases := []struct {
 		name     string
-		u        Update[int]
+		update   Update[int]
 		expected bool
 	}{
 		{
-			name:     "Unset",
-			u:        Update[int]{},
+			name:     "Noop",
+			update:   NewNoop[int](),
 			expected: false,
 		},
 		{
-			name:     "Removed",
-			u:        NewUpdatePtr[int](nil),
+			name:     "Remove",
+			update:   NewRemove[int](),
 			expected: false,
 		},
 		{
 			name:     "Set/NotEqual",
-			u:        NewUpdate(value + 1),
+			update:   NewSet(value + 1),
 			expected: false,
 		},
 		{
 			name:     "Set/Equal",
-			u:        NewUpdate(value),
+			update:   NewSet(value),
 			expected: true,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.u.IsSetTo(value); actual != testCase.expected {
+			if actual := testCase.update.IsSetTo(value); actual != testCase.expected {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
@@ -293,34 +272,34 @@ func TestUpdate_IsSetSuchThat(t *testing.T) {
 	}
 	testCases := []struct {
 		name     string
-		u        Update[int]
+		update   Update[int]
 		expected bool
 	}{
 		{
-			name:     "Unset",
-			u:        Update[int]{},
+			name:     "Noop",
+			update:   NewNoop[int](),
 			expected: false,
 		},
 		{
-			name:     "Removed",
-			u:        NewUpdatePtr[int](nil),
+			name:     "Remove",
+			update:   NewRemove[int](),
 			expected: false,
 		},
 		{
 			name:     "Set/NotSatisfied",
-			u:        NewUpdate(1),
+			update:   NewSet(1),
 			expected: false,
 		},
 		{
 			name:     "Set/Satisfied",
-			u:        NewUpdate(-1),
+			update:   NewSet(-1),
 			expected: true,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.u.IsSetSuchThat(isNegative); actual != testCase.expected {
+			if actual := testCase.update.IsSetSuchThat(isNegative); actual != testCase.expected {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
@@ -330,39 +309,39 @@ func TestUpdate_IsSetSuchThat(t *testing.T) {
 func TestUpdate_String(t *testing.T) {
 	testCases := []struct {
 		name     string
-		u        fmt.Stringer
+		update   fmt.Stringer
 		expected string
 	}{
 		{
-			name:     "Unset",
-			u:        Update[string]{},
-			expected: "<unset>",
+			name:     "Noop",
+			update:   NewNoop[int](),
+			expected: "<no-op>",
 		},
 		{
-			name:     "Removed",
-			u:        NewUpdatePtr[string](nil),
-			expected: "<removed>",
+			name:     "Remove",
+			update:   NewRemove[int](),
+			expected: "<remove>",
 		},
 		{
 			name:     "Set/Stringer",
-			u:        NewUpdate(stringer{}),
+			update:   NewSet(stringer{}),
 			expected: "stringer",
 		},
 		{
 			name:     "Set/String",
-			u:        NewUpdate("value"),
+			update:   NewSet("value"),
 			expected: "value",
 		},
 		{
 			name:     "Set/Int",
-			u:        NewUpdate(42),
+			update:   NewSet(42),
 			expected: "42",
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.u.String(); actual != testCase.expected {
+			if actual := testCase.update.String(); actual != testCase.expected {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})

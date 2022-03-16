@@ -14,31 +14,33 @@ func Example() {
 		Flag nullable.Update[bool]   `json:"flag"`
 	}
 
-	// Fields are unset by default.
+	// Update fields are no-ops by default and excluded from JSON.
 	out := Update{
 		ID:   1,
-		Name: nullable.NewUpdate("Alice"),
+		Name: nullable.NewSet("Alice"),
 	}
 	if data, err := nullable.MarshalJSON(&out); err == nil {
-		fmt.Println("Flag unset:", string(data))
+		fmt.Println("With Flag unset:", string(data))
 	}
 
-	// Fields can be explicitly nulled to remove them.
-	out.Flag.SetPtr(nil)
+	// Removal operations are marshalled with explicit null values.
+	out.Flag = nullable.NewRemove[bool]()
 	if data, err := nullable.MarshalJSON(&out); err == nil {
-		fmt.Println("Flag removed:", string(data))
+		fmt.Println("With Flag removed:", string(data))
 	}
 
-	// Unmarshalling JSON sets nullable fields appropriately.
+	// Unmarshalling from JSON sets nullable update fields appropriately.
 	in := Update{}
 	if err := json.Unmarshal([]byte(`{"flag":true}`), &in); err == nil {
-		fmt.Println("Name is set:", in.Name.IsSet())
-		fmt.Println("Flag value:", *in.Flag.Value())
+		fmt.Println("Name is a", in.Name.Operation())
+		if value, ok := in.Flag.Value(); ok {
+			fmt.Println("Flag is set to", value)
+		}
 	}
 
 	// Output:
-	// Flag unset: {"name":"Alice"}
-	// Flag removed: {"name":"Alice","flag":null}
-	// Name is set: false
-	// Flag value: true
+	// With Flag unset: {"name":"Alice"}
+	// With Flag removed: {"name":"Alice","flag":null}
+	// Name is a no-op
+	// Flag is set to true
 }

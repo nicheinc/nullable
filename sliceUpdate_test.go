@@ -24,22 +24,22 @@ func TestSliceUpdate_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "EmptyJSONObject",
 			json:     `{}`,
-			expected: SliceUpdate[int]{},
+			expected: NewNoopSlice[int](),
 		},
 		{
-			name:     "NullSlice",
+			name:     "NullUpdate",
 			json:     `{"update": null}`,
-			expected: NewSliceUpdate[int](nil),
+			expected: NewRemoveSlice[int](),
 		},
 		{
-			name:     "EmptySlice",
-			json:     `{"update": null}`,
-			expected: NewSliceUpdate[int](nil),
+			name:     "EmptyUpdate",
+			json:     `{"update": []}`,
+			expected: NewSetSlice([]int{}),
 		},
 		{
-			name:     "NonemptySlice",
+			name:     "NonemptyUpdate",
 			json:     fmt.Sprintf(`{"update": %v}`, testSlice1),
-			expected: NewSliceUpdate(testSlice1),
+			expected: NewSetSlice(testSlice1),
 		},
 	}
 
@@ -58,81 +58,96 @@ func TestSliceUpdate_UnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestSliceUpdate_SetValue(t *testing.T) {
+func TestSliceUpdate_OperationAccessors(t *testing.T) {
 	testCases := []struct {
-		name     string
-		value    []int
-		expected SliceUpdate[int]
+		name             string
+		update           SliceUpdate[int]
+		expectedOp       Operation
+		expectedIsNoop   bool
+		expectedIsRemove bool
+		expectedIsSet    bool
 	}{
 		{
-			name:     "NullSlice",
-			value:    nil,
-			expected: NewSliceUpdate[int](nil),
+			name:           "Noop",
+			update:         NewNoopSlice[int](),
+			expectedOp:     Noop,
+			expectedIsNoop: true,
 		},
 		{
-			name:     "EmptySlice",
-			value:    []int{},
-			expected: NewSliceUpdate([]int{}),
+			name:             "Remove",
+			update:           NewRemoveSlice[int](),
+			expectedOp:       Remove,
+			expectedIsRemove: true,
 		},
 		{
-			name:     "NonemptySlice",
-			value:    testSlice1,
-			expected: NewSliceUpdate(testSlice1),
+			name:          "Set",
+			update:        NewSetSlice(testSlice1),
+			expectedOp:    Set,
+			expectedIsSet: true,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := SliceUpdate[int]{}
-			actual.SetValue(testCase.value)
-			if !reflect.DeepEqual(actual, testCase.expected) {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			var (
+				op       = testCase.update.Operation()
+				isNoop   = testCase.update.IsNoop()
+				isRemove = testCase.update.IsRemove()
+				isSet    = testCase.update.IsSet()
+			)
+			if op != testCase.expectedOp {
+				t.Errorf("Expected Operation(): %v. Actual: %v", testCase.expectedOp, op)
 			}
-		})
-	}
-}
-
-func TestSliceUpdate_Removed(t *testing.T) {
-	testCases := []struct {
-		name     string
-		u        SliceUpdate[int]
-		expected bool
-	}{
-		{
-			name:     "NotSet",
-			u:        SliceUpdate[int]{},
-			expected: false,
-		},
-		{
-			name:     "NullInt",
-			u:        NewSliceUpdate[int](nil),
-			expected: true,
-		},
-		{
-			name:     "ValueInt",
-			u:        NewSliceUpdate(testSlice1),
-			expected: false,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			actual := testCase.u.Removed()
-			if !reflect.DeepEqual(actual, testCase.expected) {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			if isNoop != testCase.expectedIsNoop {
+				t.Errorf("Expected IsNoop(): %v. Actual: %v", testCase.expectedIsNoop, isNoop)
+			}
+			if isRemove != testCase.expectedIsRemove {
+				t.Errorf("Expected IsRemove(): %v. Actual: %v", testCase.expectedIsRemove, isRemove)
+			}
+			if isSet != testCase.expectedIsSet {
+				t.Errorf("Expected IsSet(): %v. Actual: %v", testCase.expectedIsSet, isSet)
 			}
 		})
 	}
 }
 
 func TestSliceUpdate_Value(t *testing.T) {
-	var u SliceUpdate[int]
-	if u.Value() != nil {
-		t.Errorf("Expected: nil. Actual: %v", u.Value())
+	testCases := []struct {
+		name          string
+		update        SliceUpdate[int]
+		expectedValue []int
+		expectedOK    bool
+	}{
+		{
+			name:          "Noop",
+			update:        NewNoopSlice[int](),
+			expectedValue: nil,
+			expectedOK:    false,
+		},
+		{
+			name:          "Remove",
+			update:        NewRemoveSlice[int](),
+			expectedValue: nil,
+			expectedOK:    false,
+		},
+		{
+			name:          "Set",
+			update:        NewSetSlice(testSlice1),
+			expectedValue: testSlice1,
+			expectedOK:    true,
+		},
 	}
-	u.SetValue(testSlice1)
-	if !reflect.DeepEqual(u.Value(), testSlice1) {
-		t.Errorf("Expected: %v. Actual: %v", testSlice1, u.Value())
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			value, ok := testCase.update.Value()
+			if !reflect.DeepEqual(value, testCase.expectedValue) {
+				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, value)
+			}
+			if ok != testCase.expectedOK {
+				t.Errorf("Expected ok: %v. Actual: %v", testCase.expectedOK, ok)
+			}
+		})
 	}
 }
 
@@ -143,19 +158,19 @@ func TestSliceUpdate_Apply(t *testing.T) {
 		expected []int
 	}{
 		{
-			name:     "Unset",
-			u:        SliceUpdate[int]{},
+			name:     "Noop",
+			u:        NewNoopSlice[int](),
 			expected: testSlice1,
 		},
 		{
-			name:     "Removed",
-			u:        NewSliceUpdate[int](nil),
+			name:     "Remove",
+			u:        NewRemoveSlice[int](),
 			expected: nil,
 		},
 		{
 			name:     "Set",
-			u:        NewSliceUpdate([]int{testValue, testValue}),
-			expected: []int{testValue, testValue},
+			u:        NewSetSlice(testSlice2),
+			expected: testSlice2,
 		},
 	}
 
@@ -176,34 +191,34 @@ func TestSliceUpdate_Diff(t *testing.T) {
 		expected SliceUpdate[int]
 	}{
 		{
-			name:     "Unset",
-			u:        SliceUpdate[int]{},
+			name:     "Noop",
+			u:        NewNoopSlice[int](),
 			value:    testSlice1,
-			expected: SliceUpdate[int]{},
+			expected: NewNoopSlice[int](),
 		},
 		{
-			name:     "Removed/NonZeroValue",
-			u:        NewSliceUpdate[int](nil),
+			name:     "Remove/NonZeroValue",
+			u:        NewRemoveSlice[int](),
 			value:    testSlice1,
-			expected: NewSliceUpdate[int](nil),
+			expected: NewRemoveSlice[int](),
 		},
 		{
-			name:     "Removed/ZeroValue",
-			u:        NewSliceUpdate[int](nil),
+			name:     "Remove/ZeroValue",
+			u:        NewRemoveSlice[int](),
 			value:    nil,
-			expected: SliceUpdate[int]{},
+			expected: NewNoopSlice[int](),
 		},
 		{
 			name:     "Set/Equal",
-			u:        NewSliceUpdate(testSlice1),
+			u:        NewSetSlice(testSlice1),
 			value:    testSlice1,
-			expected: SliceUpdate[int]{},
+			expected: NewNoopSlice[int](),
 		},
 		{
 			name:     "Set/NotEqual",
-			u:        NewSliceUpdate(testSlice2),
+			u:        NewSetSlice(testSlice2),
 			value:    testSlice1,
-			expected: NewSliceUpdate(testSlice2),
+			expected: NewSetSlice(testSlice2),
 		},
 	}
 
@@ -223,28 +238,28 @@ func TestSliceUpdate_IsSetTo(t *testing.T) {
 		expected bool
 	}{
 		{
-			name:     "Unset",
-			u:        SliceUpdate[int]{},
+			name:     "Noop",
+			u:        NewNoopSlice[int](),
 			expected: false,
 		},
 		{
-			name:     "Removed",
-			u:        NewSliceUpdate[int](nil),
+			name:     "Remove",
+			u:        NewSetSlice[int](nil),
 			expected: false,
 		},
 		{
 			name:     "Set/NotEqual/DifferentSizes",
-			u:        NewSliceUpdate(testSlice2),
+			u:        NewSetSlice(testSlice2),
 			expected: false,
 		},
 		{
 			name:     "Set/NotEqual/SameSize",
-			u:        NewSliceUpdate([]int{0}),
+			u:        NewSetSlice([]int{0}),
 			expected: false,
 		},
 		{
 			name:     "Set/Equal",
-			u:        NewSliceUpdate(testSlice1),
+			u:        NewSetSlice(testSlice1),
 			expected: true,
 		},
 	}
@@ -268,23 +283,23 @@ func TestSliceUpdate_IsSetSuchThat(t *testing.T) {
 		expected bool
 	}{
 		{
-			name:     "Unset",
-			u:        SliceUpdate[int]{},
+			name:     "Noop",
+			u:        NewNoopSlice[int](),
 			expected: false,
 		},
 		{
-			name:     "Removed",
-			u:        NewSliceUpdate[int](nil),
+			name:     "Remove",
+			u:        NewSetSlice[int](nil),
 			expected: false,
 		},
 		{
 			name:     "Set/NotSatisfied",
-			u:        NewSliceUpdate(testSlice1),
+			u:        NewSetSlice(testSlice1),
 			expected: false,
 		},
 		{
 			name:     "Set/Satisfied",
-			u:        NewSliceUpdate(testSlice2),
+			u:        NewSetSlice(testSlice2),
 			expected: true,
 		},
 	}
@@ -305,23 +320,23 @@ func TestSliceUpdate_String(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "Unset",
+			name:     "Noop",
 			u:        SliceUpdate[string]{},
-			expected: "<unset>",
+			expected: "<no-op>",
 		},
 		{
-			name:     "Removed",
-			u:        NewSliceUpdate[string](nil),
-			expected: "<removed>",
+			name:     "Remove",
+			u:        NewRemoveSlice[string](),
+			expected: "<remove>",
 		},
 		{
 			name:     "Set/StringerSlice",
-			u:        NewSliceUpdate([]stringer{{}}),
+			u:        NewSetSlice([]stringer{{}}),
 			expected: "[stringer]",
 		},
 		{
 			name:     "Set/IntSlice",
-			u:        NewSliceUpdate([]int{42}),
+			u:        NewSetSlice([]int{42}),
 			expected: "[42]",
 		},
 	}

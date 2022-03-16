@@ -6,16 +6,16 @@ import (
 	"strings"
 )
 
-// MarshalJSON is a reimplementation of json.Marshal that understands Nullable
-// types. Any struct that contains Nullable fields should call this function
-// instead of the default json.Marshal. See
-// https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling for more
-// info.
+// MarshalJSON is a reimplementation of json.Marshal that understands nullable
+// update types. Any struct that contains Update or SliceUpdate fields should
+// call this function instead of the default json.Marshal. For more info, see
+// https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling.
 func MarshalJSON(v interface{}) ([]byte, error) {
 	// This implementation only works on pointers. This is because to check
-	// whether each field implements Nullable, we need to take each field's
-	// address. But the reflected value of an interface containing a struct
-	// value is not addressable (https://golang.org/pkg/reflect/#Value.CanAddr).
+	// whether each field implements updateMarshaller, we need to take each
+	// field's address. But the reflected value of an interface containing a
+	// struct value is not addressable
+	// (https://golang.org/pkg/reflect/#Value.CanAddr).
 	//
 	// The simplest workaround is if v is not already a pointer, marshal its
 	// address instead.
@@ -71,7 +71,7 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 		switch field := fieldValue.Addr().Interface().(type) {
 		case updateMarshaller:
 			// Only marshal update fields that are explicitly set/removed.
-			if field.include() {
+			if field.shouldBeMarshalled() {
 				if err := appendField(field.interfaceValue()); err != nil {
 					return nil, err
 				}
@@ -87,8 +87,8 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 }
 
 type updateMarshaller interface {
-	// include returns whether the receiver should be marshalled
-	include() bool
+	// shouldBeMarshalled returns whether the receiver should be marshalled.
+	shouldBeMarshalled() bool
 	// interfaceValue returns the (possibly nil) updated value as an interface{}
 	// suitable for marshalling structs.
 	interfaceValue() interface{}

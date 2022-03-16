@@ -14,15 +14,15 @@ need to be marshalled to/from JSON.
 If we were to use pointer fields with the omitempty JSON struct tag option for
 these structs, then fields explicitly set to nil to be removed would simply be
 absent from the marshalled JSON, i.e. unchanged. If we were to use pointer
-fields without omitempty, then unset fields would be present and null in the
-JSON output, i.e. removed.
+fields without omitempty, then nil fields would be present and null in the JSON
+output, i.e. removed.
 
-The Nullable field types distinguish between "unchanged" and "removed", allowing
-them to correctly and seamlessly unmarshal themselves from JSON.
+The Update and SliceUpdate types distinguish between no-op and removal updates,
+allowing them to correctly and seamlessly unmarshal themselves from JSON.
 
 Marshalling
 
-Unfortunately, the default JSON marshaller is unaware of Nullable types, and
+Unfortunately, the default JSON marshaller is unaware of nullable types, and
 providing a MarshalJSON implementation in the types themselves is insufficient
 because it's the containing struct that determines which field names appear in
 the JSON output.
@@ -32,29 +32,30 @@ A custom implementation can use an ad-hoc struct mirroring the original struct
 field is set before copying it into the output struct, but implementing this
 method for every update type is laborious and error-prone. To avoid this
 boilerplate, this package provides the nullable.MarshalJSON function, which
-implements a version of json.Marshal that respects the unset/removed status of
-Nullable types.
+implements a version of json.Marshal that respects the no-op/remove distinction.
 
-Aside from Nullable fields, nullable.MarshalJSON should behave exactly like
-json.Marshal (https://golang.org/pkg/encoding/json/#Marshal), with the following
-exceptions:
+Besides its treatment of Update/SliceUpdate fields, nullable.MarshalJSON behaves
+exactly like json.Marshal (https://golang.org/pkg/encoding/json/#Marshal), with
+the following exceptions:
 
 • Anonymous fields are skipped
 
 • The string tag option is ignored
 
-Note that the omitempty option does not affect Nullable types. The default JSON
+Note that the omitempty option does not affect nullable types. The default JSON
 marshaller never omits struct values, but nullable.MarshalJSON takes the use of
-a Nullable type per se as an indication to omit the field if it's unset, even if
-omitempty is absent.
+a nullable type per se as an indication to omit the field if it's a no-op, even
+if omitempty is absent.
 
 To avoid accidentally calling the default implementation, it's prudent to
-implement a MarshalJSON for each relevant type that simply calls
+implement for each relevant type a MarshalJSON method that simply calls
 nullable.MarshalJSON.
 
-There is a proposal (https://github.com/golang/go/issues/11939) to add support
-for omitting zero-valued structs with omitempty. If this or a similar proposal
-were accepted, nullable.MarshalJSON could be eliminated in favor of implementing
-MarshalJSON and IsZero for the Nullable types.
+There are several outstanding golang proposals that could eliminate the need for
+a custom MarshalJSON implementation in the future. One proposal
+(https://github.com/golang/go/issues/11939) would allow zero-valued structs to
+be treated as empty with respect to omitempty fields. Another proposal
+(https://github.com/golang/go/issues/50480) would allow types to return (nil,
+nil) from MarshalJSON to indicate they should be treated as empty by omitempty.
 */
 package nullable

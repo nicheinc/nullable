@@ -103,20 +103,20 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			expected: `{"EmptyName":1}`,
 		},
 		{
-			name: "Update/Unset",
+			name: "Update/Noop",
 			input: &struct {
 				Field Update[int]
 			}{
-				Field: Update[int]{},
+				Field: NewNoop[int](),
 			},
 			expected: `{}`,
 		},
 		{
-			name: "Update/Removed",
+			name: "Update/Remove",
 			input: &struct {
 				Field Update[int]
 			}{
-				Field: NewUpdatePtr[int](nil),
+				Field: NewRemove[int](),
 			},
 			expected: `{"Field":null}`,
 		},
@@ -125,7 +125,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			input: &struct {
 				Field Update[int]
 			}{
-				Field: NewUpdate(1),
+				Field: NewSet(1),
 			},
 			expected: `{"Field":1}`,
 		},
@@ -237,19 +237,19 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			},
 		},
 		{
-			name: "Update/Unset",
+			name: "Update/Noop",
 			input: &struct {
 				Field Update[int]
 			}{
-				Field: Update[int]{},
+				Field: NewNoop[int](),
 			},
 		},
 		{
-			name: "Update/Removed",
+			name: "Update/Remove",
 			input: &struct {
 				Field Update[int]
 			}{
-				Field: NewUpdatePtr[int](nil),
+				Field: NewRemove[int](),
 			},
 		},
 		{
@@ -257,23 +257,23 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field Update[int]
 			}{
-				Field: NewUpdate(1),
+				Field: NewSet(1),
 			},
 		},
 		{
-			name: "SliceUpdate/Unset",
+			name: "SliceUpdate/Noop",
 			input: &struct {
 				Field SliceUpdate[int]
 			}{
-				Field: SliceUpdate[int]{},
+				Field: NewNoopSlice[int](),
 			},
 		},
 		{
-			name: "SliceUpdate/Removed",
+			name: "SliceUpdate/Remove",
 			input: &struct {
 				Field SliceUpdate[int]
 			}{
-				Field: NewSliceUpdate[int](nil),
+				Field: NewRemoveSlice[int](),
 			},
 		},
 		{
@@ -281,7 +281,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 			input: &struct {
 				Field SliceUpdate[int]
 			}{
-				Field: NewSliceUpdate([]int{}),
+				Field: NewSetSlice([]int{}),
 			},
 		},
 		{
