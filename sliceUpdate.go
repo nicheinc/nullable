@@ -83,6 +83,17 @@ func (u SliceUpdate[T]) Value() (value []T, isSet bool) {
 	return u.value, u.op == OpSet
 }
 
+// ValueOrNil returns this update's value if it's a set operation or else nil.
+func (u SliceUpdate[T]) ValueOrNil() []T {
+	if u.op != OpSet {
+		return nil
+	}
+	// Copy the update value so it can't be mutated via the returned slice.
+	value := make([]T, len(u.value))
+	copy(value, u.value)
+	return value
+}
+
 // Apply returns the result of applying the update to the given value. The
 // result is the given value if the update is a no-op, nil if it's a removal, or
 // the update's contained value is if it's a set operation.

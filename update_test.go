@@ -168,8 +168,8 @@ func TestUpdate_Value(t *testing.T) {
 		},
 		{
 			name:          "Set",
-			update:        Set(42),
-			expectedValue: 42,
+			update:        Set(testValue),
+			expectedValue: testValue,
 			expectedOK:    true,
 		},
 	}
@@ -182,6 +182,39 @@ func TestUpdate_Value(t *testing.T) {
 			}
 			if isSet != testCase.expectedOK {
 				t.Errorf("Expected isSet: %v. Actual: %v", testCase.expectedOK, isSet)
+			}
+		})
+	}
+}
+
+func TestUpdate_ValueOrNil(t *testing.T) {
+	testCases := []struct {
+		name     string
+		update   Update[int]
+		expected *int
+	}{
+		{
+			name:     "Noop",
+			update:   Noop[int](),
+			expected: nil,
+		},
+		{
+			name:     "Remove",
+			update:   Remove[int](),
+			expected: nil,
+		},
+		{
+			name:     "Set",
+			update:   Set(testValue),
+			expected: &testValue,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.update.ValueOrNil()
+			if !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected value: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
 	}

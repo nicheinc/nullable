@@ -191,6 +191,39 @@ func TestSliceUpdate_Value(t *testing.T) {
 	}
 }
 
+func TestSliceUpdate_ValueOrNil(t *testing.T) {
+	testCases := []struct {
+		name     string
+		update   SliceUpdate[int]
+		expected []int
+	}{
+		{
+			name:     "Noop",
+			update:   SliceNoop[int](),
+			expected: nil,
+		},
+		{
+			name:     "Remove",
+			update:   SliceRemove[int](),
+			expected: nil,
+		},
+		{
+			name:     "Set",
+			update:   SliceSet(testSlice1),
+			expected: testSlice1,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.update.ValueOrNil()
+			if !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected value: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestSliceUpdate_Apply(t *testing.T) {
 	testCases := []struct {
 		name     string
