@@ -9,7 +9,7 @@ This package provides types representing updates to struct fields,
 distinguishing between no-ops, removals, and modifications when marshalling
 updates to/from JSON.
 
-See [godoc](https://pkg.go.dev/github.com/nicheinc/nullable) for usage and
+See [godoc](https://pkg.go.dev/github.com/nicheinc/nullable/v2) for usage and
 examples.
 
 ## Motivation
