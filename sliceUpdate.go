@@ -40,17 +40,20 @@ func (u SliceUpdate[T]) Operation() Operation {
 	return u.op
 }
 
-// IsNoop is shorthand for Operation() == Noop.
+// IsNoop returns whether this update is a no-op. IsNoop is shorthand for
+// Operation() == Noop.
 func (u SliceUpdate[T]) IsNoop() bool {
 	return u.op == OpNoop
 }
 
-// IsRemove is shorthand for Operation() == Remove.
+// IsRemove returns whether this update is a remove operation. IsRemove is
+// shorthand for Operation() == Remove.
 func (u SliceUpdate[T]) IsRemove() bool {
 	return u.op == OpRemove
 }
 
-// IsSet is shorthand for Operation() == Set.
+// IsSet returns whether this update is a set operation. IsSet is shorthand for
+// Operation() == Set.
 func (u SliceUpdate[T]) IsSet() bool {
 	return u.op == OpSet
 }

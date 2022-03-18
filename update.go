@@ -41,17 +41,20 @@ func (u Update[T]) Operation() Operation {
 	return u.op
 }
 
-// IsNoop is shorthand for Operation() == OpNoop.
+// IsNoop returns whether this update is a no-op. IsNoop is shorthand for
+// Operation() == Noop.
 func (u Update[T]) IsNoop() bool {
 	return u.op == OpNoop
 }
 
-// IsRemove is shorthand for Operation() == OpRemove.
+// IsRemove returns whether this update is a remove operation. IsRemove is
+// shorthand for Operation() == Remove.
 func (u Update[T]) IsRemove() bool {
 	return u.op == OpRemove
 }
 
-// IsSet is shorthand for Operation() == OpSet.
+// IsSet returns whether this update is a set operation. IsSet is shorthand for
+// Operation() == Set.
 func (u Update[T]) IsSet() bool {
 	return u.op == OpSet
 }
