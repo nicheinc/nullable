@@ -50,6 +50,43 @@ func TestUpdate_UnmarshalJSON(t *testing.T) {
 	}
 }
 
+func TestRemoveOrSet(t *testing.T) {
+	var (
+		zero = 0
+		one  = 1
+	)
+	testCases := []struct {
+		name     string
+		ptr      *int
+		expected Update[int]
+	}{
+		{
+			name:     "Nil",
+			ptr:      nil,
+			expected: Noop[int](),
+		},
+		{
+			name:     "Zero",
+			ptr:      &zero,
+			expected: Set(0),
+		},
+		{
+			name:     "Nonzero",
+			ptr:      &one,
+			expected: Set(1),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := RemoveOrSet(testCase.ptr)
+			if actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestUpdate_OperationAccessors(t *testing.T) {
 	testCases := []struct {
 		name             string

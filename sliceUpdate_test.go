@@ -58,6 +58,39 @@ func TestSliceUpdate_UnmarshalJSON(t *testing.T) {
 	}
 }
 
+func TestSliceRemoveOrSet(t *testing.T) {
+	testCases := []struct {
+		name     string
+		value    []int
+		expected SliceUpdate[int]
+	}{
+		{
+			name:     "Nil",
+			value:    nil,
+			expected: SliceNoop[int](),
+		},
+		{
+			name:     "EmptyNonNil",
+			value:    []int{},
+			expected: SliceSet([]int{}),
+		},
+		{
+			name:     "Nonempty",
+			value:    testSlice1,
+			expected: SliceSet(testSlice1),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := SliceRemoveOrSet(testCase.value)
+			if !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestSliceUpdate_OperationAccessors(t *testing.T) {
 	testCases := []struct {
 		name             string

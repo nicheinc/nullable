@@ -36,6 +36,16 @@ func Set[T comparable](value T) Update[T] {
 	}
 }
 
+// RemoveOrSet returns an update that either removes or sets a field's value,
+// depending on the given pointer. If the pointer is nil, it will remove;
+// otherwise it will set to the pointer's value.
+func RemoveOrSet[T comparable](ptr *T) Update[T] {
+	if ptr == nil {
+		return Noop[T]()
+	}
+	return Set(*ptr)
+}
+
 // Operation returns the operation this update performs: no-op, remove, or set.
 func (u Update[T]) Operation() Operation {
 	return u.op

@@ -35,6 +35,17 @@ func SliceSet[T comparable](value []T) SliceUpdate[T] {
 	}
 }
 
+// RemoveOrSet returns a slice update that either removes or sets a field's
+// value, depending on the given slice value. If the value is nil, it will
+// remove; otherwise it will set to the given value. Note that a nil slice is
+// different from an allocated but zero-length slice, such as []int{}.
+func SliceRemoveOrSet[T comparable](value []T) SliceUpdate[T] {
+	if value == nil {
+		return SliceNoop[T]()
+	}
+	return SliceSet(value)
+}
+
 // Operation returns the operation this update performs: no-op, remove, or set.
 func (u SliceUpdate[T]) Operation() Operation {
 	return u.op
