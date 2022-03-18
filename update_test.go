@@ -63,7 +63,7 @@ func TestRemoveOrSet(t *testing.T) {
 		{
 			name:     "Nil",
 			ptr:      nil,
-			expected: Noop[int](),
+			expected: Remove[int](),
 		},
 		{
 			name:     "Zero",

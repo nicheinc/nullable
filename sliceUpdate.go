@@ -41,7 +41,7 @@ func SliceSet[T comparable](value []T) SliceUpdate[T] {
 // different from an allocated but zero-length slice, such as []int{}.
 func SliceRemoveOrSet[T comparable](value []T) SliceUpdate[T] {
 	if value == nil {
-		return SliceNoop[T]()
+		return SliceRemove[T]()
 	}
 	return SliceSet(value)
 }

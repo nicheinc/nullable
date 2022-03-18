@@ -67,7 +67,7 @@ func TestSliceRemoveOrSet(t *testing.T) {
 		{
 			name:     "Nil",
 			value:    nil,
-			expected: SliceNoop[int](),
+			expected: SliceRemove[int](),
 		},
 		{
 			name:     "EmptyNonNil",

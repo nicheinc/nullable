@@ -41,7 +41,7 @@ func Set[T comparable](value T) Update[T] {
 // otherwise it will set to the pointer's value.
 func RemoveOrSet[T comparable](ptr *T) Update[T] {
 	if ptr == nil {
-		return Noop[T]()
+		return Remove[T]()
 	}
 	return Set(*ptr)
 }
