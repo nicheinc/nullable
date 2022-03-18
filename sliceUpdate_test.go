@@ -116,36 +116,36 @@ func TestSliceUpdate_Value(t *testing.T) {
 		name          string
 		update        SliceUpdate[int]
 		expectedValue []int
-		expectedOK    bool
+		expectedIsSet bool
 	}{
 		{
 			name:          "Noop",
 			update:        SliceNoop[int](),
 			expectedValue: nil,
-			expectedOK:    false,
+			expectedIsSet: false,
 		},
 		{
 			name:          "Remove",
 			update:        SliceRemove[int](),
 			expectedValue: nil,
-			expectedOK:    false,
+			expectedIsSet: false,
 		},
 		{
 			name:          "Set",
 			update:        SliceSet(testSlice1),
 			expectedValue: testSlice1,
-			expectedOK:    true,
+			expectedIsSet: true,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			value, ok := testCase.update.Value()
+			value, isSet := testCase.update.Value()
 			if !reflect.DeepEqual(value, testCase.expectedValue) {
 				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, value)
 			}
-			if ok != testCase.expectedOK {
-				t.Errorf("Expected ok: %v. Actual: %v", testCase.expectedOK, ok)
+			if isSet != testCase.expectedIsSet {
+				t.Errorf("Expected isSet: %v. Actual: %v", testCase.expectedIsSet, isSet)
 			}
 		})
 	}

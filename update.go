@@ -56,10 +56,11 @@ func (u Update[T]) IsSet() bool {
 	return u.op == OpSet
 }
 
-// Value returns the update's value and an "ok" flag indicating whether the
-// update is a set operation. If the flag is false (because the update is
-// actually a no-op or removal), then the returned value is T's zero value.
-func (u Update[T]) Value() (value T, ok bool) {
+// Value returns the value this update sets fields to (if any) and an isSet flag
+// indicating whether the update is a set operation. If the flag is false
+// (because the update is actually a no-op or removal), then the returned value
+// is T's zero value.
+func (u Update[T]) Value() (value T, isSet bool) {
 	return u.value, u.op == OpSet
 }
 

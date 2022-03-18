@@ -33,7 +33,7 @@ func Example() {
 	in := Update{}
 	if err := json.Unmarshal([]byte(`{"flag":true}`), &in); err == nil {
 		fmt.Println("Name is a", in.Name.Operation())
-		if value, ok := in.Flag.Value(); ok {
+		if value, isSet := in.Flag.Value(); isSet {
 			fmt.Println("Flag is set to", value)
 		}
 	}

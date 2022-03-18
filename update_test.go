@@ -132,12 +132,12 @@ func TestUpdate_Value(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			value, ok := testCase.update.Value()
+			value, isSet := testCase.update.Value()
 			if value != testCase.expectedValue {
 				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, value)
 			}
-			if ok != testCase.expectedOK {
-				t.Errorf("Expected ok: %v. Actual: %v", testCase.expectedOK, ok)
+			if isSet != testCase.expectedOK {
+				t.Errorf("Expected isSet: %v. Actual: %v", testCase.expectedOK, isSet)
 			}
 		})
 	}
