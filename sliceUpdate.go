@@ -40,22 +40,28 @@ func (u SliceUpdate[T]) Operation() Operation {
 	return u.op
 }
 
-// IsNoop returns whether this update is a no-op. IsNoop is shorthand for
-// Operation() == Noop.
+// IsNoop returns whether this update is a no-op. IsNoop is equivalent to
+// Operation() == OpNoop.
 func (u SliceUpdate[T]) IsNoop() bool {
 	return u.op == OpNoop
 }
 
 // IsRemove returns whether this update is a remove operation. IsRemove is
-// shorthand for Operation() == Remove.
+// equivalent to Operation() == OpRemove.
 func (u SliceUpdate[T]) IsRemove() bool {
 	return u.op == OpRemove
 }
 
-// IsSet returns whether this update is a set operation. IsSet is shorthand for
-// Operation() == Set.
+// IsSet returns whether this update is a set operation. IsSet is equivalent to
+// Operation() == OpSet.
 func (u SliceUpdate[T]) IsSet() bool {
 	return u.op == OpSet
+}
+
+// IsChange returns whether this update is either a set or remove operation
+// (i.e., not a no-op). IsChange is equivalent to Operation() != OpNoop.
+func (u SliceUpdate[T]) IsChange() bool {
+	return u.op != OpNoop
 }
 
 // Value returns the value this update sets fields to (if any) and an isSet flag

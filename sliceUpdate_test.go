@@ -66,6 +66,7 @@ func TestSliceUpdate_OperationAccessors(t *testing.T) {
 		expectedIsNoop   bool
 		expectedIsRemove bool
 		expectedIsSet    bool
+		expectedIsChange bool
 	}{
 		{
 			name:           "Noop",
@@ -78,12 +79,14 @@ func TestSliceUpdate_OperationAccessors(t *testing.T) {
 			update:           SliceRemove[int](),
 			expectedOp:       OpRemove,
 			expectedIsRemove: true,
+			expectedIsChange: true,
 		},
 		{
-			name:          "Set",
-			update:        SliceSet(testSlice1),
-			expectedOp:    OpSet,
-			expectedIsSet: true,
+			name:             "Set",
+			update:           SliceSet(testSlice1),
+			expectedOp:       OpSet,
+			expectedIsSet:    true,
+			expectedIsChange: true,
 		},
 	}
 
@@ -94,6 +97,7 @@ func TestSliceUpdate_OperationAccessors(t *testing.T) {
 				isNoop   = testCase.update.IsNoop()
 				isRemove = testCase.update.IsRemove()
 				isSet    = testCase.update.IsSet()
+				isChange = testCase.update.IsChange()
 			)
 			if op != testCase.expectedOp {
 				t.Errorf("Expected Operation(): %v. Actual: %v", testCase.expectedOp, op)
@@ -106,6 +110,9 @@ func TestSliceUpdate_OperationAccessors(t *testing.T) {
 			}
 			if isSet != testCase.expectedIsSet {
 				t.Errorf("Expected IsSet(): %v. Actual: %v", testCase.expectedIsSet, isSet)
+			}
+			if isChange != testCase.expectedIsChange {
+				t.Errorf("Expected IsChange(): %v. Actual: %v", testCase.expectedIsChange, isChange)
 			}
 		})
 	}
