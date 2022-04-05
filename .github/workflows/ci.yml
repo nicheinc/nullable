@@ -15,8 +15,6 @@ jobs:
       - name: Set Go Versions
         uses: arnested/go-version-action@v1
         id: versions 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     runs-on: ubuntu-latest
