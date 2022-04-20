@@ -87,6 +87,46 @@ func TestRemoveOrSet(t *testing.T) {
 	}
 }
 
+func TestUpdate_ValueOperation(t *testing.T) {
+	testCases := []struct {
+		name          string
+		update        Update[int]
+		expectedValue int
+		expectedOp    Operation
+	}{
+		{
+			name:          "Noop",
+			update:        Noop[int](),
+			expectedValue: 0,
+			expectedOp:    OpNoop,
+		},
+		{
+			name:          "Remove",
+			update:        Remove[int](),
+			expectedValue: 0,
+			expectedOp:    OpRemove,
+		},
+		{
+			name:          "Set",
+			update:        Set(testValue),
+			expectedValue: testValue,
+			expectedOp:    OpSet,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actualValue, actualOp := testCase.update.ValueOperation()
+			if actualValue != testCase.expectedValue {
+				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, actualValue)
+			}
+			if actualOp != testCase.expectedOp {
+				t.Errorf("Expected operation: %v. Actual: %v", testCase.expectedOp, actualOp)
+			}
+		})
+	}
+}
+
 func TestUpdate_OperationAccessors(t *testing.T) {
 	testCases := []struct {
 		name             string

@@ -46,6 +46,14 @@ func RemoveOrSet[T comparable](ptr *T) Update[T] {
 	return Set(*ptr)
 }
 
+// ValueOperation returns the value this update sets fields to (if any) and the
+// operation this update performs: no-op, remove, or set. If this update is not
+// a set operation, then the returned value is T's zero value; i.e., the value
+// is only meaningful if the operation is OpSet.
+func (u Update[T]) ValueOperation() (value T, operation Operation) {
+	return u.value, u.op
+}
+
 // Operation returns the operation this update performs: no-op, remove, or set.
 func (u Update[T]) Operation() Operation {
 	return u.op
