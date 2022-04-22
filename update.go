@@ -166,11 +166,6 @@ func (u Update[T]) String() string {
 	}
 }
 
-// shouldBeMarshalled partially implements updateMarshaller.
-func (u Update[T]) shouldBeMarshalled() bool {
-	return u.op != OpNoop
-}
-
 // interfaceValue partially implements updateMarshaller.
 func (u Update[T]) interfaceValue() interface{} {
 	if u.op == OpSet {

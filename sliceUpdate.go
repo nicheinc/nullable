@@ -163,11 +163,6 @@ func (u SliceUpdate[T]) String() string {
 	return fmt.Sprintf("%v", u.value)
 }
 
-// shouldBeMarshalled partially implements updateMarshaller.
-func (u SliceUpdate[T]) shouldBeMarshalled() bool {
-	return u.op != OpNoop
-}
-
 // interfaceValue partially implements updateMarshaller.
 func (u SliceUpdate[T]) interfaceValue() interface{} {
 	if u.op == OpSet {

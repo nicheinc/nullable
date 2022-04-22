@@ -78,8 +78,8 @@ func marshalPtrJSON(v interface{}) ([]byte, error) {
 		}
 		switch field := fieldValue.Addr().Interface().(type) {
 		case updateMarshaller:
-			// Only marshal update fields that are explicitly set/removed.
-			if field.shouldBeMarshalled() {
+			// Only marshal changes (not no-ops).
+			if field.IsChange() {
 				if err := appendField(field.interfaceValue()); err != nil {
 					return nil, err
 				}
@@ -95,8 +95,8 @@ func marshalPtrJSON(v interface{}) ([]byte, error) {
 }
 
 type updateMarshaller interface {
-	// shouldBeMarshalled returns whether the receiver should be marshalled.
-	shouldBeMarshalled() bool
+	// IsChange utilizes the IsChange methods on Update and SliceUpdate.
+	IsChange() bool
 	// interfaceValue returns the (possibly nil) updated value as an interface{}
 	// suitable for marshalling structs.
 	interfaceValue() interface{}
