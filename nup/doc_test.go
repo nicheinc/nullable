@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	nup "github.com/nicheinc/nullable/v2"
+	"github.com/nicheinc/nullable/v2/nup"
 )
 
 func Example() {
