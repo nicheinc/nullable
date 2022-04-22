@@ -1,35 +1,35 @@
-package nully_test
+package nup_test
 
 import (
 	"encoding/json"
 	"fmt"
 
-	nully "github.com/nicheinc/nullable/v2"
+	nup "github.com/nicheinc/nullable/v2"
 )
 
 func Example() {
 	type Update struct {
-		ID   int                  `json:"-"`
-		Name nully.Update[string] `json:"name"`
-		Flag nully.Update[bool]   `json:"flag"`
+		ID   int                `json:"-"`
+		Name nup.Update[string] `json:"name"`
+		Flag nup.Update[bool]   `json:"flag"`
 	}
 
 	// Update fields are no-ops by default and excluded from JSON.
 	out := Update{
 		ID:   1,
-		Name: nully.Set("Alice"),
+		Name: nup.Set("Alice"),
 	}
-	if data, err := nully.MarshalJSON(&out); err == nil {
+	if data, err := nup.MarshalJSON(&out); err == nil {
 		fmt.Println("With Flag unset:", string(data))
 	}
 
 	// Removal operations are marshalled with explicit null values.
-	out.Flag = nully.Remove[bool]()
-	if data, err := nully.MarshalJSON(&out); err == nil {
+	out.Flag = nup.Remove[bool]()
+	if data, err := nup.MarshalJSON(&out); err == nil {
 		fmt.Println("With Flag removed:", string(data))
 	}
 
-	// Unmarshalling from JSON sets nully update fields appropriately.
+	// Unmarshalling from JSON sets nup types appropriately.
 	in := Update{}
 	if err := json.Unmarshal([]byte(`{"flag":true}`), &in); err == nil {
 		fmt.Println("Name is a", in.Name.Operation())

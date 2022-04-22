@@ -1,4 +1,4 @@
-package nully
+package nup
 
 import (
 	"encoding/json"
@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-// MarshalJSON is a reimplementation of json.Marshal that understands nully
-// update types. Any struct that contains Update or SliceUpdate fields should
-// call this function instead of the default json.Marshal. For more info, see
+// MarshalJSON is a reimplementation of json.Marshal that understands nup types.
+// Any struct that contains Update or SliceUpdate fields should call this
+// function instead of the default json.Marshal. For more info, see
 // https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling.
 func MarshalJSON(v interface{}) ([]byte, error) {
 	// Marshal nil as null.

@@ -1,4 +1,4 @@
-package nully
+package nup
 
 // Operation represents the operation that an update performs. The OpNoop,
 // OpRemove, and OpSet constants are the only valid values of this type.

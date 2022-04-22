@@ -1,4 +1,4 @@
-package nully
+package nup
 
 import "testing"
 

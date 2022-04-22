@@ -1,4 +1,4 @@
-# nullable
+# nup
 
 [![Build Status](https://github.com/nicheinc/nullable/actions/workflows/ci.yml/badge.svg)](https://github.com/nicheinc/nullable/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nicheinc/nullable)](https://goreportcard.com/report/github.com/nicheinc/nullable)
@@ -7,7 +7,7 @@
 
 This package provides types representing updates to struct fields,
 distinguishing between no-ops, removals, and modifications when marshalling
-updates to/from JSON.
+those updates to/from JSON.
 
 See [godoc](https://pkg.go.dev/github.com/nicheinc/nullable/v2) for usage and
 examples.
@@ -15,7 +15,7 @@ examples.
 ## Motivation
 
 It's often useful to define data updates using JSON objects, where each
-key-value pair represents an update to a field - using a value of `null` to
+key-value pair represents an update to a field, using a value of `null` to
 indicate deletion. If a certain key is not present, the corresponding field is
 not modified. We want to define go structs corresponding to these updates, which
 need to be marshalled to/from JSON.
@@ -34,9 +34,9 @@ JSON.
 
 This package can be imported into a module-aware Go project as follows:
 
-`go get github.com/nicheinc/nullable/2`
+`go get github.com/nicheinc/nullable/v2`
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on contributing to
-`nullable`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on contributing to the `nup`
+package.
