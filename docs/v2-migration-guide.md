@@ -24,7 +24,8 @@ other types. (The `SliceUpdate[T]` implementation always uses `fmt.Sprintf` with
 # Migration Guide
 
 The package has been renamed from `nullable` to `nup` (for "nullable update").
-It's 62.5% shorter and 87% more whimsical!
+It's 62.5% shorter and 87% more whimsical! You should replace v1 imports
+(`github.com/nicheinc/nullable`) with `github.com/nicheinc/nullable/v2/nup`.
 
 The old `Value` method on each `Nullable` type has been replaced with three
 `Update` methods: `Value`, `ValueOperation`, and `ValueOrNil`:
