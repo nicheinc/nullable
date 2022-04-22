@@ -91,6 +91,46 @@ func TestSliceRemoveOrSet(t *testing.T) {
 	}
 }
 
+func TestSliceUpdate_ValueOperation(t *testing.T) {
+	testCases := []struct {
+		name          string
+		update        SliceUpdate[int]
+		expectedValue []int
+		expectedOp    Operation
+	}{
+		{
+			name:          "Noop",
+			update:        SliceNoop[int](),
+			expectedValue: nil,
+			expectedOp:    OpNoop,
+		},
+		{
+			name:          "Remove",
+			update:        SliceRemove[int](),
+			expectedValue: nil,
+			expectedOp:    OpRemove,
+		},
+		{
+			name:          "Set",
+			update:        SliceSet(testSlice1),
+			expectedValue: testSlice1,
+			expectedOp:    OpSet,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actualValue, actualOp := testCase.update.ValueOperation()
+			if !reflect.DeepEqual(actualValue, testCase.expectedValue) {
+				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, actualValue)
+			}
+			if actualOp != testCase.expectedOp {
+				t.Errorf("Expected operation: %v. Actual: %v", testCase.expectedOp, actualOp)
+			}
+		})
+	}
+}
+
 func TestSliceUpdate_OperationAccessors(t *testing.T) {
 	testCases := []struct {
 		name             string
