@@ -78,28 +78,3 @@ func IsNegative(update nup.Update[int]) bool {
 	return ok && value < 0
 }
 ```
-
-There is a small change to the behavior of `nup.MarshalJSON` for types
-containing `nup` types nested deeper than one level. Previously, our
-`MarshalJSON` only performed special marshalling logic for top-level struct
-fields. Now it recurses into structs. Consider the following snippet:
-
-```go
-type Child struct {
-	Update nup.Update[int]
-}
-type Parent struct {
-	Child Child
-}
-value := Parent{
-	Child: Child{
-		Update: nup.Noop[int]()
-	}
-}
-```
-
-Previously (ignoring v1 vs. v2 update types), `value` would have been marshalled
-as `{"Child":{"Update":null}}`. Now, it will be marshalled as `{"Child":{}}`.
-
-Note that `nup.MarshalJSON` still does not recurse into `map`s or other types
-that might contain a `nup` type.

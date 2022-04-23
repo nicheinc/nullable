@@ -2,6 +2,7 @@ package nup
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -13,22 +14,29 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		expected string
 	}{
 		{
+			name:     "Nil",
+			input:    nil,
+			expected: "null",
+		},
+		{
 			name:     "Primitive",
 			input:    5,
 			expected: "5",
 		},
 		{
-			name: "StructValue",
-			input: struct {
-				Value int
+			name: "PointerToStruct",
+			input: &struct {
+				Value  int
+				Update Update[int]
 			}{
-				Value: 5,
+				Value:  5,
+				Update: Noop[int](),
 			},
 			expected: `{"Value":5}`,
 		},
 		{
 			name: "Unexported",
-			input: &struct {
+			input: struct {
 				unexported int
 			}{
 				unexported: 0,
@@ -37,7 +45,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "Omitted",
-			input: &struct {
+			input: struct {
 				Omitted int `json:"-"`
 			}{
 				Omitted: 0,
@@ -46,7 +54,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "Omitempy/Empty",
-			input: &struct {
+			input: struct {
 				Slice []int   `json:",omitempty"`
 				B     bool    `json:",omitempty"`
 				I     int     `json:",omitempty"`
@@ -65,7 +73,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "Omitempy/Nonempty",
-			input: &struct {
+			input: struct {
 				Slice      []int    `json:",omitempty"`
 				B          bool     `json:",omitempty"`
 				I          int      `json:",omitempty"`
@@ -86,7 +94,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "NoTag",
-			input: &struct {
+			input: struct {
 				NoTag bool
 			}{
 				NoTag: true,
@@ -95,7 +103,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "EmptyName",
-			input: &struct {
+			input: struct {
 				EmptyName int `json:","`
 			}{
 				EmptyName: 1,
@@ -104,7 +112,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "Update/Noop",
-			input: &struct {
+			input: struct {
 				Field Update[int]
 			}{
 				Field: Noop[int](),
@@ -113,7 +121,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "Update/Remove",
-			input: &struct {
+			input: struct {
 				Field Update[int]
 			}{
 				Field: Remove[int](),
@@ -122,7 +130,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "Update/Set",
-			input: &struct {
+			input: struct {
 				Field Update[int]
 			}{
 				Field: Set(1),
@@ -131,7 +139,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "MultipleFields",
-			input: &struct {
+			input: struct {
 				First  int
 				Second int
 				Third  int
@@ -144,57 +152,12 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		},
 		{
 			name: "AnonymousField",
-			input: &struct {
+			input: struct {
 				int
 			}{
 				int: 1,
 			},
 			expected: `{}`,
-		},
-		{
-			name: "NestedUpdate/Noop",
-			input: &struct {
-				Field struct {
-					NestedField Update[int]
-				}
-			}{
-				Field: struct {
-					NestedField Update[int]
-				}{
-					NestedField: Noop[int](),
-				},
-			},
-			expected: `{"Field":{}}`,
-		},
-		{
-			name: "NestedUpdate/Remove",
-			input: &struct {
-				Field struct {
-					NestedField Update[int]
-				}
-			}{
-				Field: struct {
-					NestedField Update[int]
-				}{
-					NestedField: Remove[int](),
-				},
-			},
-			expected: `{"Field":{"NestedField":null}}`,
-		},
-		{
-			name: "NestedUpdate/Set",
-			input: &struct {
-				Field struct {
-					NestedField Update[int]
-				}
-			}{
-				Field: struct {
-					NestedField Update[int]
-				}{
-					NestedField: Set(1),
-				},
-			},
-			expected: `{"Field":{"NestedField":1}}`,
 		},
 	}
 
@@ -212,144 +175,141 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 	}
 }
 
-// roundTrip returns unmarshal(marshal(input)).
-func roundTrip(t *testing.T, input interface{}) interface{} {
-	// Declare output with same type as input.
-	output := reflect.New(reflect.TypeOf(input).Elem()).Interface()
-	// Marshal input.
-	data, err := MarshalJSON(input)
-	if err != nil {
-		t.Errorf("Error while marshalling: %v", err)
-	}
-	// Unmarshal resulting JSON to output.
-	if err := json.Unmarshal(data, output); err != nil {
-		t.Errorf("Error while unmarshalling: %v", err)
-	}
-	return output
+func TestMarshalJSON_RoundTrip(t *testing.T) {
+	roundtrip(t, "Primitive", 0)
+	roundtrip(t, "EmptyStruct", struct{}{})
+	roundtrip(t, "Omitted", struct {
+		Omitted int `json:"-"`
+	}{
+		Omitted: 0,
+	})
+	roundtrip(t, "Omitempy/Empty", struct {
+		Omitempty int `json:"omitempty"`
+	}{
+		Omitempty: 0,
+	})
+	roundtrip(t, "Omitempy/Nonempty", struct {
+		Omitempty int `json:"omitempty"`
+	}{
+		Omitempty: 1,
+	})
+	roundtrip(t, "NoTag", struct {
+		NoTag int
+	}{
+		NoTag: 1,
+	})
+	roundtrip(t, "EmptyName", struct {
+		EmptyName int `json:","`
+	}{
+		EmptyName: 1,
+	})
+	roundtrip(t, "Update/Noop", struct {
+		Field Update[int]
+	}{
+		Field: Noop[int](),
+	})
+	roundtrip(t, "Update/Remove", struct {
+		Field Update[int]
+	}{
+		Field: Remove[int](),
+	})
+	roundtrip(t, "Update/Set", struct {
+		Field Update[int]
+	}{
+		Field: Set(1),
+	})
+	roundtrip(t, "SliceUpdate/Noop", struct {
+		Field SliceUpdate[int]
+	}{
+		Field: SliceNoop[int](),
+	})
+	roundtrip(t, "SliceUpdate/Remove", struct {
+		Field SliceUpdate[int]
+	}{
+		Field: SliceRemove[int](),
+	})
+	roundtrip(t, "SliceUpdate/Set", struct {
+		Field SliceUpdate[int]
+	}{
+		Field: SliceSet([]int{}),
+	})
+	roundtrip(t, "MultipleFields", struct {
+		First  int
+		Second int
+		Third  int
+	}{
+		First:  1,
+		Second: 2,
+		Third:  3,
+	})
 }
 
-func TestMarshalJSON_RoundTrip(t *testing.T) {
+// roundtrip checks that unmarshal(marshal(input)) == input.
+func roundtrip[T any](t *testing.T, testName string, input T) {
+	t.Run(testName, func(t *testing.T) {
+		// Marshal input.
+		data, err := MarshalJSON(input)
+		if err != nil {
+			t.Errorf("Error while marshalling: %v", err)
+		}
+		// Unmarshal resulting JSON to output.
+		var output T
+		if err := json.Unmarshal(data, &output); err != nil {
+			t.Errorf("Error while unmarshalling: %v", err)
+		}
+		// Marshalling then unmarshalling should result in the same value.
+		if !reflect.DeepEqual(input, output) {
+			t.Errorf("Expected: %v. Actual: %v", input, output)
+		}
+	})
+}
+
+func TestMarshalJSON_FieldErrors(t *testing.T) {
 	testCases := []struct {
 		name  string
 		input interface{}
 	}{
 		{
-			name:  "Primitive",
-			input: new(int),
-		},
-		{
-			name:  "EmptyStruct",
-			input: &struct{}{},
-		},
-		{
-			name: "Omitted",
-			input: &struct {
-				Omitted int `json:"-"`
+			name: "NonUpdateField",
+			input: struct {
+				Field badField
 			}{
-				Omitted: 0,
+				Field: badField{},
 			},
 		},
 		{
-			name: "Omitempy/Empty",
-			input: &struct {
-				Omitempty int `json:"omitempty"`
+			name: "UpdateField",
+			input: struct {
+				Field Update[badField]
 			}{
-				Omitempty: 0,
+				Field: Set(badField{}),
 			},
 		},
 		{
-			name: "Omitempy/Nonempty",
-			input: &struct {
-				Omitempty int `json:"omitempty"`
+			name: "SliceUpdateField",
+			input: struct {
+				Field SliceUpdate[badField]
 			}{
-				Omitempty: 1,
-			},
-		},
-		{
-			name: "NoTag",
-			input: &struct {
-				NoTag int
-			}{
-				NoTag: 1,
-			},
-		},
-		{
-			name: "EmptyName",
-			input: &struct {
-				EmptyName int `json:","`
-			}{
-				EmptyName: 1,
-			},
-		},
-		{
-			name: "Update/Noop",
-			input: &struct {
-				Field Update[int]
-			}{
-				Field: Noop[int](),
-			},
-		},
-		{
-			name: "Update/Remove",
-			input: &struct {
-				Field Update[int]
-			}{
-				Field: Remove[int](),
-			},
-		},
-		{
-			name: "Update/Set",
-			input: &struct {
-				Field Update[int]
-			}{
-				Field: Set(1),
-			},
-		},
-		{
-			name: "SliceUpdate/Noop",
-			input: &struct {
-				Field SliceUpdate[int]
-			}{
-				Field: SliceNoop[int](),
-			},
-		},
-		{
-			name: "SliceUpdate/Remove",
-			input: &struct {
-				Field SliceUpdate[int]
-			}{
-				Field: SliceRemove[int](),
-			},
-		},
-		{
-			name: "SliceUpdate/Set",
-			input: &struct {
-				Field SliceUpdate[int]
-			}{
-				Field: SliceSet([]int{}),
-			},
-		},
-		{
-			name: "MultipleFields",
-			input: &struct {
-				First  int
-				Second int
-				Third  int
-			}{
-				First:  1,
-				Second: 2,
-				Third:  3,
+				Field: SliceSet([]badField{{}}),
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			output := roundTrip(t, testCase.input)
-			// Marshalling then unmarshalling should result in the same value.
-			if !reflect.DeepEqual(testCase.input, output) {
-				t.Errorf("Expected: %v. Actual: %v", testCase.input, output)
+			data, err := MarshalJSON(testCase.input)
+			if data != nil {
+				t.Errorf("Expected nil data. Actual: %v", string(data))
+			}
+			if err == nil {
+				t.Error("Expected a non-nil error")
 			}
 		})
 	}
+}
+
+type badField struct{}
+
+func (f badField) MarshalJSON() ([]byte, error) {
+	return nil, errors.New("error marshalling field")
 }

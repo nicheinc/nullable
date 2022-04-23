@@ -15,31 +15,23 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 	if v == nil {
 		return []byte("null"), nil
 	}
-	// To check whether each field of a struct argument implements
-	// updateMarshaller, we need to take the address of its reflected field
-	// values. But the reflected struct values are not addressable
-	// (https://golang.org/pkg/reflect/#Value.CanAddr), so we need to ensure
-	// we're operating a pointer to a struct. Therefore, if v is not already a
-	// pointer, we marshal its address instead.
-	if reflect.TypeOf(v).Kind() != reflect.Ptr {
-		return marshalPtrJSON(&v)
+	var (
+		reflectedValue = reflect.ValueOf(v)
+		reflectedType  = reflectedValue.Type()
+	)
+	// Dereference the reflected value once, if necessary, to support pointers.
+	if reflectedType.Kind() == reflect.Pointer {
+		reflectedValue = reflectedValue.Elem()
+		reflectedType = reflectedValue.Type()
 	}
-	return marshalPtrJSON(v)
-}
-
-// marshalPtrJSON implements most of the functionality of MarshalJSON. It
-// assumes its argument is a pointer.
-func marshalPtrJSON(v interface{}) ([]byte, error) {
-	// Since v is required to be a pointer, it's safe to get its element type.
-	reflectedType := reflect.TypeOf(v).Elem()
 	// Delegate non-struct values to the default implementation.
 	if reflectedType.Kind() != reflect.Struct {
 		return json.Marshal(v)
 	}
+
 	var (
-		reflectedValue = reflect.ValueOf(v).Elem()
-		buf            = []byte{'{'}
-		prependComma   = false
+		buf          = []byte{'{'}
+		prependComma = false
 	)
 	for i := 0; i < reflectedValue.NumField(); i++ {
 		var (
@@ -51,7 +43,7 @@ func marshalPtrJSON(v interface{}) ([]byte, error) {
 			continue
 		}
 		appendField := func(fieldInterface interface{}) error {
-			valueBuf, err := MarshalJSON(fieldInterface)
+			valueBuf, err := json.Marshal(fieldInterface)
 			if err != nil {
 				return err
 			}
@@ -76,7 +68,7 @@ func marshalPtrJSON(v interface{}) ([]byte, error) {
 			buf = append(buf, fieldBuf...)
 			return nil
 		}
-		switch field := fieldValue.Addr().Interface().(type) {
+		switch field := fieldValue.Interface().(type) {
 		case updateMarshaller:
 			// Only marshal changes (not no-ops).
 			if field.IsChange() {
