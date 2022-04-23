@@ -246,7 +246,9 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 
 // roundtrip checks that unmarshal(marshal(input)) == input.
 func roundtrip[T any](t *testing.T, testName string, input T) {
+	t.Helper()
 	t.Run(testName, func(t *testing.T) {
+		t.Helper()
 		// Marshal input.
 		data, err := MarshalJSON(input)
 		if err != nil {
