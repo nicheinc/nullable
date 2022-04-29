@@ -171,7 +171,8 @@ func (u SliceUpdate[T]) String() string {
 	return fmt.Sprintf("%v", u.value)
 }
 
-// interfaceValue partially implements updateMarshaller.
+// interfaceValue, along with IsChange, implements updateMarshaller, which
+// nup.MarshalJSON uses to detect update types and marshal them correctly.
 func (u SliceUpdate[T]) interfaceValue() interface{} {
 	if u.op == OpSet {
 		return u.value
