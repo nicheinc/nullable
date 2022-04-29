@@ -87,10 +87,11 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 }
 
 type updateMarshaller interface {
-	// IsChange utilizes the IsChange methods on Update and SliceUpdate.
+	// IsChange utilizes the IsChange methods on Update and SliceUpdate to
+	// detect whether the update should be marshalled to JSON.
 	IsChange() bool
 	// interfaceValue returns the (possibly nil) updated value as an interface{}
-	// suitable for marshalling structs.
+	// to be marshalled to JSON.
 	interfaceValue() interface{}
 }
 
