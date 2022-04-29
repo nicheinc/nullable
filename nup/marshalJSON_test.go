@@ -138,6 +138,51 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			expected: `{"Field":1}`,
 		},
 		{
+			name: "SliceUpdate/Noop",
+			input: struct {
+				Field SliceUpdate[int]
+			}{
+				Field: SliceNoop[int](),
+			},
+			expected: `{}`,
+		},
+		{
+			name: "SliceUpdate/Remove",
+			input: struct {
+				Field SliceUpdate[int]
+			}{
+				Field: SliceRemove[int](),
+			},
+			expected: `{"Field":null}`,
+		},
+		{
+			name: "SliceUpdate/Set/Nil",
+			input: struct {
+				Field SliceUpdate[int]
+			}{
+				Field: SliceSet([]int(nil)),
+			},
+			expected: `{"Field":null}`,
+		},
+		{
+			name: "SliceUpdate/Set/Empty",
+			input: struct {
+				Field SliceUpdate[int]
+			}{
+				Field: SliceSet([]int{}),
+			},
+			expected: `{"Field":[]}`,
+		},
+		{
+			name: "SliceUpdate/Set/Nonempty",
+			input: struct {
+				Field SliceUpdate[int]
+			}{
+				Field: SliceSet([]int{1}),
+			},
+			expected: `{"Field":[1]}`,
+		},
+		{
 			name: "MultipleFields",
 			input: struct {
 				First  int
@@ -228,10 +273,20 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 	}{
 		Field: SliceRemove[int](),
 	})
-	roundtrip(t, "SliceUpdate/Set", struct {
+	// NOTE: SliceSet[T](nil) does not survive the roundtrip; it will be
+	// unmarshalled as SliceRemove[T](). That's because SliceUpdate[T]'s
+	// UnmarshalJSON always treats null as "remove", not as "set to the nil
+	// slice", and that's okay because removing a slice field is semantically
+	// equivalent to setting it to nil.
+	roundtrip(t, "SliceUpdate/Set/Empty", struct {
 		Field SliceUpdate[int]
 	}{
 		Field: SliceSet([]int{}),
+	})
+	roundtrip(t, "SliceUpdate/Set/Nonempty", struct {
+		Field SliceUpdate[int]
+	}{
+		Field: SliceSet([]int{1}),
 	})
 	roundtrip(t, "MultipleFields", struct {
 		First  int

@@ -357,7 +357,7 @@ func TestSliceUpdate_IsSetTo(t *testing.T) {
 		},
 		{
 			name:     "Remove",
-			u:        SliceSet[int](nil),
+			u:        SliceRemove[int](),
 			expected: false,
 		},
 		{
@@ -402,7 +402,7 @@ func TestSliceUpdate_IsSetSuchThat(t *testing.T) {
 		},
 		{
 			name:     "Remove",
-			u:        SliceSet[int](nil),
+			u:        SliceRemove[int](),
 			expected: false,
 		},
 		{
@@ -441,6 +441,16 @@ func TestSliceUpdate_String(t *testing.T) {
 			name:     "Remove",
 			u:        SliceRemove[int](),
 			expected: "<remove>",
+		},
+		{
+			name:     "Set/Nil",
+			u:        SliceSet([]stringer(nil)),
+			expected: "[]",
+		},
+		{
+			name:     "Set/Empty",
+			u:        SliceSet([]stringer{}),
+			expected: "[]",
 		},
 		{
 			name:     "Set/StringerSlice",
