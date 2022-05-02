@@ -38,7 +38,7 @@ func SliceSet[T comparable](value []T) SliceUpdate[T] {
 // RemoveOrSet returns a slice update that either removes or sets a field's
 // value, depending on the given slice value. If the value is nil, it will
 // remove; otherwise it will set to the given value. Note that a nil slice is
-// different from an allocated but zero-length slice, such as []int{}.
+// different from an allocated but zero-length slice, []T{}.
 func SliceRemoveOrSet[T comparable](value []T) SliceUpdate[T] {
 	if value == nil {
 		return SliceRemove[T]()
@@ -46,10 +46,10 @@ func SliceRemoveOrSet[T comparable](value []T) SliceUpdate[T] {
 	return SliceSet(value)
 }
 
-// ValueOperation returns the value this update sets fields to (if any) and the
-// operation this update performs: no-op, remove, or set. If this update is not
-// a set operation, then the returned value is nil; i.e., the value is only
-// meaningful if the operation is OpSet.
+// ValueOperation returns a shallow copy of the value this update sets fields to
+// (if any) and the operation this update performs: no-op, remove, or set. If
+// this update is not a set operation, then the returned value is always nil;
+// i.e., the value is only meaningful if the operation is OpSet.
 func (u SliceUpdate[T]) ValueOperation() (value []T, operation Operation) {
 	return u.value, u.op
 }
@@ -83,28 +83,23 @@ func (u SliceUpdate[T]) IsChange() bool {
 	return u.op != OpNoop
 }
 
-// Value returns the value this update sets fields to (if any) and an isSet flag
-// indicating whether the update is a set operation. If the flag is false
-// (because the update is actually a no-op or removal), then the returned value
-// is nil.
+// Value returns a shallow copy of the value this update sets fields to (if any)
+// and an isSet flag indicating whether the update is a set operation. If the
+// flag is false (because the update is actually a no-op or removal), then the
+// returned value is nil.
 func (u SliceUpdate[T]) Value() (value []T, isSet bool) {
 	return u.value, u.op == OpSet
 }
 
-// ValueOrNil returns this update's value if it's a set operation or else nil.
+// ValueOrNil returns a shallow copy of this update's value if it's a set
+// operation or else nil.
 func (u SliceUpdate[T]) ValueOrNil() []T {
-	if u.op != OpSet {
-		return nil
-	}
-	// Copy the update value so it can't be mutated via the returned slice.
-	value := make([]T, len(u.value))
-	copy(value, u.value)
-	return value
+	return u.value
 }
 
 // Apply returns the result of applying the update to the given value. The
 // result is the given value if the update is a no-op, nil if it's a removal, or
-// the update's contained value is if it's a set operation.
+// a shallow copy of the update's contained value if it's a set operation.
 func (u SliceUpdate[T]) Apply(value []T) []T {
 	switch u.op {
 	case OpNoop:
@@ -116,9 +111,9 @@ func (u SliceUpdate[T]) Apply(value []T) []T {
 	}
 }
 
-// Diff returns the update itself if Apply(value) != value; otherwise it returns
-// a no-op update. Diff can be used to omit extraneous updates when applying
-// them would have no effect.
+// Diff returns the update itself if Apply(value) is not element-wise equal to
+// value; otherwise it returns a no-op update. Diff can be used to omit
+// extraneous updates when applying them would have no effect.
 func (u SliceUpdate[T]) Diff(value []T) SliceUpdate[T] {
 	if sliceEquals(u.Apply(value), value) {
 		return SliceNoop[T]()
@@ -136,9 +131,10 @@ func (u *SliceUpdate[T]) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &u.value)
 }
 
-// IsSetTo returns whether the update set to the given value.
-func (u SliceUpdate[T]) IsSetTo(newValue []T) bool {
-	return u.op == OpSet && sliceEquals(u.value, newValue)
+// IsSetTo returns whether the update sets to a value that is element-wise equal
+// to the given value.
+func (u SliceUpdate[T]) IsSetTo(value []T) bool {
+	return u.op == OpSet && sliceEquals(u.value, value)
 }
 
 func sliceEquals[T comparable](slice1 []T, slice2 []T) bool {

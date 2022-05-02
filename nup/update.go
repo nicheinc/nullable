@@ -103,7 +103,7 @@ func (u Update[T]) ValueOrNil() *T {
 
 // Apply returns the result of applying the update to the given value. The
 // result is the given value if the update is a no-op, the zero value if it's a
-// removal, or the update's contained value is if it's a set operation.
+// removal, or the update's contained value if it's a set operation.
 func (u Update[T]) Apply(value T) T {
 	switch u.op {
 	case OpNoop:
