@@ -156,29 +156,29 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 			expected: `{"Field":null}`,
 		},
 		{
-			name: "SliceUpdate/Set/Nil",
+			name: "SliceUpdate/RemoveOrSet/Nil",
 			input: struct {
 				Field SliceUpdate[int]
 			}{
-				Field: SliceSet([]int(nil)),
+				Field: SliceRemoveOrSet([]int(nil)),
 			},
 			expected: `{"Field":null}`,
 		},
 		{
-			name: "SliceUpdate/Set/Empty",
+			name: "SliceUpdate/RemoveOrSet/Empty",
 			input: struct {
 				Field SliceUpdate[int]
 			}{
-				Field: SliceSet([]int{}),
+				Field: SliceRemoveOrSet([]int{}),
 			},
 			expected: `{"Field":[]}`,
 		},
 		{
-			name: "SliceUpdate/Set/Nonempty",
+			name: "SliceUpdate/RemoveOrSet/Nonempty",
 			input: struct {
 				Field SliceUpdate[int]
 			}{
-				Field: SliceSet([]int{1}),
+				Field: SliceRemoveOrSet([]int{1}),
 			},
 			expected: `{"Field":[1]}`,
 		},
@@ -273,20 +273,20 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 	}{
 		Field: SliceRemove[int](),
 	})
-	// NOTE: SliceSet[T](nil) does not survive the roundtrip; it will be
-	// unmarshalled as SliceRemove[T](). That's because SliceUpdate[T]'s
-	// UnmarshalJSON always treats null as "remove", not as "set to the nil
-	// slice", and that's okay because removing a slice field is semantically
-	// equivalent to setting it to nil.
-	roundtrip(t, "SliceUpdate/Set/Empty", struct {
+	roundtrip(t, "SliceUpdate/RemoveOrSet/Nil", struct {
 		Field SliceUpdate[int]
 	}{
-		Field: SliceSet([]int{}),
+		Field: SliceRemoveOrSet[int](nil),
 	})
-	roundtrip(t, "SliceUpdate/Set/Nonempty", struct {
+	roundtrip(t, "SliceUpdate/RemoveOrSet/Empty", struct {
 		Field SliceUpdate[int]
 	}{
-		Field: SliceSet([]int{1}),
+		Field: SliceRemoveOrSet([]int{}),
+	})
+	roundtrip(t, "SliceUpdate/RemoveOrSet/Nonempty", struct {
+		Field SliceUpdate[int]
+	}{
+		Field: SliceRemoveOrSet([]int{1}),
 	})
 	roundtrip(t, "MultipleFields", struct {
 		First  int
@@ -347,7 +347,7 @@ func TestMarshalJSON_FieldErrors(t *testing.T) {
 			input: struct {
 				Field SliceUpdate[badField]
 			}{
-				Field: SliceSet([]badField{{}}),
+				Field: SliceRemoveOrSet([]badField{{}}),
 			},
 		},
 	}

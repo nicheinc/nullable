@@ -34,12 +34,12 @@ func TestSliceUpdate_UnmarshalJSON(t *testing.T) {
 		{
 			name:     "EmptyUpdate",
 			json:     `{"update": []}`,
-			expected: SliceSet([]int{}),
+			expected: SliceRemoveOrSet([]int{}),
 		},
 		{
 			name:     "NonemptyUpdate",
 			json:     fmt.Sprintf(`{"update": %v}`, testSlice1),
-			expected: SliceSet(testSlice1),
+			expected: SliceRemoveOrSet(testSlice1),
 		},
 	}
 
@@ -72,12 +72,12 @@ func TestSliceRemoveOrSet(t *testing.T) {
 		{
 			name:     "EmptyNonNil",
 			value:    []int{},
-			expected: SliceSet([]int{}),
+			expected: SliceRemoveOrSet([]int{}),
 		},
 		{
 			name:     "Nonempty",
 			value:    testSlice1,
-			expected: SliceSet(testSlice1),
+			expected: SliceRemoveOrSet(testSlice1),
 		},
 	}
 
@@ -112,7 +112,7 @@ func TestSliceUpdate_ValueOperation(t *testing.T) {
 		},
 		{
 			name:          "Set",
-			update:        SliceSet(testSlice1),
+			update:        SliceRemoveOrSet(testSlice1),
 			expectedValue: testSlice1,
 			expectedOp:    OpSet,
 		},
@@ -156,7 +156,7 @@ func TestSliceUpdate_OperationAccessors(t *testing.T) {
 		},
 		{
 			name:             "Set",
-			update:           SliceSet(testSlice1),
+			update:           SliceRemoveOrSet(testSlice1),
 			expectedOp:       OpSet,
 			expectedIsSet:    true,
 			expectedIsChange: true,
@@ -212,7 +212,7 @@ func TestSliceUpdate_Value(t *testing.T) {
 		},
 		{
 			name:          "Set",
-			update:        SliceSet(testSlice1),
+			update:        SliceRemoveOrSet(testSlice1),
 			expectedValue: testSlice1,
 			expectedIsSet: true,
 		},
@@ -249,7 +249,7 @@ func TestSliceUpdate_ValueOrNil(t *testing.T) {
 		},
 		{
 			name:     "Set",
-			update:   SliceSet(testSlice1),
+			update:   SliceRemoveOrSet(testSlice1),
 			expected: testSlice1,
 		},
 	}
@@ -282,7 +282,7 @@ func TestSliceUpdate_Apply(t *testing.T) {
 		},
 		{
 			name:     "Set",
-			u:        SliceSet(testSlice2),
+			u:        SliceRemoveOrSet(testSlice2),
 			expected: testSlice2,
 		},
 	}
@@ -323,15 +323,15 @@ func TestSliceUpdate_Diff(t *testing.T) {
 		},
 		{
 			name:     "Set/Equal",
-			u:        SliceSet(testSlice1),
+			u:        SliceRemoveOrSet(testSlice1),
 			value:    testSlice1,
 			expected: SliceNoop[int](),
 		},
 		{
 			name:     "Set/NotEqual",
-			u:        SliceSet(testSlice2),
+			u:        SliceRemoveOrSet(testSlice2),
 			value:    testSlice1,
-			expected: SliceSet(testSlice2),
+			expected: SliceRemoveOrSet(testSlice2),
 		},
 	}
 
@@ -362,17 +362,17 @@ func TestSliceUpdate_IsSetTo(t *testing.T) {
 		},
 		{
 			name:     "Set/NotEqual/DifferentSizes",
-			u:        SliceSet(testSlice2),
+			u:        SliceRemoveOrSet(testSlice2),
 			expected: false,
 		},
 		{
 			name:     "Set/NotEqual/SameSize",
-			u:        SliceSet([]int{0}),
+			u:        SliceRemoveOrSet([]int{0}),
 			expected: false,
 		},
 		{
 			name:     "Set/Equal",
-			u:        SliceSet(testSlice1),
+			u:        SliceRemoveOrSet(testSlice1),
 			expected: true,
 		},
 	}
@@ -407,12 +407,12 @@ func TestSliceUpdate_IsSetSuchThat(t *testing.T) {
 		},
 		{
 			name:     "Set/NotSatisfied",
-			u:        SliceSet(testSlice1),
+			u:        SliceRemoveOrSet(testSlice1),
 			expected: false,
 		},
 		{
 			name:     "Set/Satisfied",
-			u:        SliceSet(testSlice2),
+			u:        SliceRemoveOrSet(testSlice2),
 			expected: true,
 		},
 	}
@@ -443,23 +443,23 @@ func TestSliceUpdate_String(t *testing.T) {
 			expected: "<remove>",
 		},
 		{
-			name:     "Set/Nil",
-			u:        SliceSet([]stringer(nil)),
+			name:     "RemoveOrSet/Nil",
+			u:        SliceRemoveOrSet([]stringer(nil)),
+			expected: "<remove>",
+		},
+		{
+			name:     "RemoveOrSet/Empty",
+			u:        SliceRemoveOrSet([]stringer{}),
 			expected: "[]",
 		},
 		{
-			name:     "Set/Empty",
-			u:        SliceSet([]stringer{}),
-			expected: "[]",
-		},
-		{
-			name:     "Set/StringerSlice",
-			u:        SliceSet([]stringer{{}}),
+			name:     "RemoveOrSet/StringerSlice",
+			u:        SliceRemoveOrSet([]stringer{{}}),
 			expected: "[stringer]",
 		},
 		{
-			name:     "Set/IntSlice",
-			u:        SliceSet([]int{42}),
+			name:     "RemoveOrSet/IntSlice",
+			u:        SliceRemoveOrSet([]int{42}),
 			expected: "[42]",
 		},
 	}

@@ -8,10 +8,6 @@ Version 2 replaces the `Nullable` interface and various implementations
 need for allocations, and it also means that updates can now be meaningfully
 compared using `==`.
 
-Unlike `StringSlice`, `SliceUpdate` can distinguish between removed and set to
-`nil`. This is more in line with non-slice updates, which could always
-distinguish between removed and set to the zero value.
-
 In `nullable` version 1, only `nullable.String` implements `fmt.Stringer`. With
 go 1.18 generics, it's not possible to implement an interface only for
 particular type parameters of a generic type, leaving us with the choice to
@@ -28,7 +24,7 @@ It's 62.5% shorter and 87% more whimsical! You should replace v1 imports
 (`github.com/nicheinc/nullable`) with `github.com/nicheinc/nullable/v2/nup`.
 
 The old `Value` method on each `Nullable` type has been replaced with three
-`Update` methods: `Value`, `ValueOperation`, and `ValueOrNil`:
+`Update`/`SliceUpdatge` methods: `Value`, `ValueOperation`, and `ValueOrNil`:
 - The new `Value` method returns two values: `value` and `isSet`. `isSet`
   indicates whether the update is a set operation. If `isSet` is true, then
   `value` is the update's set value. If `isSet` is false, then `value` is the

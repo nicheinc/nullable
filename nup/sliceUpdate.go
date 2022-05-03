@@ -27,23 +27,20 @@ func SliceRemove[T comparable]() SliceUpdate[T] {
 	}
 }
 
-// SliceSet returns a slice update that sets a field's value to the given value.
-func SliceSet[T comparable](value []T) SliceUpdate[T] {
-	return SliceUpdate[T]{
-		op:    OpSet,
-		value: value,
-	}
-}
-
-// RemoveOrSet returns a slice update that either removes or sets a field's
+// SliceRemoveOrSet returns a slice update that either removes or sets a field's
 // value, depending on the given slice value. If the value is nil, it will
 // remove; otherwise it will set to the given value. Note that a nil slice is
 // different from an allocated but zero-length slice, []T{}.
 func SliceRemoveOrSet[T comparable](value []T) SliceUpdate[T] {
 	if value == nil {
-		return SliceRemove[T]()
+		return SliceUpdate[T]{
+			op: OpRemove,
+		}
 	}
-	return SliceSet(value)
+	return SliceUpdate[T]{
+		op:    OpSet,
+		value: value,
+	}
 }
 
 // ValueOperation returns a shallow copy of the value this update sets fields to
