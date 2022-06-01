@@ -470,3 +470,58 @@ type stringer struct{}
 func (s stringer) String() string {
 	return "stringer"
 }
+
+func TestUpdate_Equal(t *testing.T) {
+	testCases := []struct {
+		name     string
+		first    Update[int]
+		second   Update[int]
+		expected bool
+	}{
+		{
+			name:     "Equal/Noop",
+			first:    Noop[int](),
+			second:   Noop[int](),
+			expected: true,
+		},
+		{
+			name:     "Equal/Remove",
+			first:    Remove[int](),
+			second:   Remove[int](),
+			expected: true,
+		},
+		{
+			name:     "Equal/Set",
+			first:    Set(testValue),
+			second:   Set(testValue),
+			expected: true,
+		},
+		{
+			name:     "NotEqual/Noop/Remove",
+			first:    Noop[int](),
+			second:   Remove[int](),
+			expected: false,
+		},
+		{
+			name:     "NotEqual/Remove/Set",
+			first:    Remove[int](),
+			second:   Set(testValue),
+			expected: false,
+		},
+		{
+			name:     "NotEqual/Set/Noop",
+			first:    Set(testValue),
+			second:   Noop[int](),
+			expected: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.first.Equal(testCase.second)
+			if actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
