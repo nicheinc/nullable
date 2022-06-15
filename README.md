@@ -1,4 +1,4 @@
-# nullable
+# nup
 
 [![Build Status](https://github.com/nicheinc/nullable/actions/workflows/ci.yml/badge.svg)](https://github.com/nicheinc/nullable/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nicheinc/nullable)](https://goreportcard.com/report/github.com/nicheinc/nullable)
@@ -7,35 +7,36 @@
 
 This package provides types representing updates to struct fields,
 distinguishing between no-ops, removals, and modifications when marshalling
-updates to/from JSON.
+those updates to/from JSON.
 
-See [godoc](https://pkg.go.dev/github.com/nicheinc/nullable) for usage and
+See [godoc](https://pkg.go.dev/github.com/nicheinc/nullable/v2) for usage and
 examples.
 
 ## Motivation
 
 It's often useful to define data updates using JSON objects, where each
-key-value pair represents a field and its new value - using `null` to indicate
-deletion. If a certain key is not present, the corresponding field is not
-modified. We want to define go structs corresponding to these updates, which
+key-value pair represents an update to a field, using a value of `null` to
+indicate deletion. If a certain key is not present, the corresponding field is
+not modified. We want to define go structs corresponding to these updates, which
 need to be marshalled to/from JSON.
 
 If we were to use pointer fields with the `omitempty` JSON struct tag option for
-these structs, then fields explicitly set to `nil` to be removed would simply be
-absent from the marshalled JSON, i.e. unchanged. If we were to use pointer
-fields without `omitempty`, then unset fields would be present and `null` in the
-JSON output, i.e. removed.
+these structs, then fields explicitly set to `nil` to be removed would instead
+simply be absent from the marshalled JSON, i.e. unchanged. If we were to use
+pointer fields without `omitempty`, then `nil` fields would be present and
+`null` in the JSON output, i.e. removed.
 
-The `Nullable` field types distinguish between "unchanged" and "removed",
-allowing them to correctly and seamlessly unmarshal themselves from JSON.
+The `Update` and `SliceUpdate` types distinguish between no-op and removal
+updates, allowing them to correctly and seamlessly unmarshal themselves from
+JSON.
 
 ## Installation
 
 This package can be imported into a module-aware Go project as follows:
 
-`go get github.com/nicheinc/nullable`
+`go get github.com/nicheinc/nullable/v2`
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on contributing to
-`nullable`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on contributing to the `nup`
+package.

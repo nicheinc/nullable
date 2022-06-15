@@ -1,4 +1,4 @@
-package nullable
+package nup
 
 import (
 	"encoding/json"
@@ -6,32 +6,32 @@ import (
 	"strings"
 )
 
-// MarshalJSON is a reimplementation of json.Marshal that understands Nullable
-// types. Any struct that contains Nullable fields should call this function
-// instead of the default json.Marshal. See
-// https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling for more
-// info.
+// MarshalJSON is a reimplementation of json.Marshal that understands nup types.
+// Any struct that contains Update or SliceUpdate fields should call this
+// function instead of the default json.Marshal. For more info, see
+// https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling.
 func MarshalJSON(v interface{}) ([]byte, error) {
-	// This implementation only works on pointers. This is because to check
-	// whether each field implements Nullable, we need to take each field's
-	// address. But the reflected value of an interface containing a struct
-	// value is not addressable (https://golang.org/pkg/reflect/#Value.CanAddr).
-	//
-	// The simplest workaround is if v is not already a pointer, marshal its
-	// address instead.
-	if reflect.TypeOf(v).Kind() != reflect.Ptr {
-		return MarshalJSON(&v)
+	// Marshal nil as null.
+	if v == nil {
+		return []byte("null"), nil
 	}
-	// Now that we know v is a pointer, get its element type.
-	reflectedType := reflect.TypeOf(v).Elem()
+	var (
+		reflectedValue = reflect.ValueOf(v)
+		reflectedType  = reflectedValue.Type()
+	)
+	// Dereference the reflected value once, if necessary, to support pointers.
+	if reflectedType.Kind() == reflect.Pointer {
+		reflectedValue = reflectedValue.Elem()
+		reflectedType = reflectedValue.Type()
+	}
 	// Delegate non-struct values to the default implementation.
 	if reflectedType.Kind() != reflect.Struct {
 		return json.Marshal(v)
 	}
+
 	var (
-		reflectedValue = reflect.ValueOf(v).Elem()
-		buf            = []byte{'{'}
-		prependComma   = false
+		buf          = []byte{'{'}
+		prependComma = false
 	)
 	for i := 0; i < reflectedValue.NumField(); i++ {
 		var (
@@ -68,11 +68,11 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 			buf = append(buf, fieldBuf...)
 			return nil
 		}
-		switch field := fieldValue.Addr().Interface().(type) {
-		case Nullable:
-			// Only marshal nullable fields that are explicitly set.
-			if field.IsSet() {
-				if err := appendField(field.InterfaceValue()); err != nil {
+		switch field := fieldValue.Interface().(type) {
+		case updateMarshaller:
+			// Only marshal changes (not no-ops).
+			if field.IsChange() {
+				if err := appendField(field.interfaceValue()); err != nil {
 					return nil, err
 				}
 			}
@@ -84,6 +84,15 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 	}
 	buf = append(buf, '}')
 	return buf, nil
+}
+
+type updateMarshaller interface {
+	// IsChange utilizes the IsChange methods on Update and SliceUpdate to
+	// detect whether the update should be marshalled to JSON.
+	IsChange() bool
+	// interfaceValue returns the (possibly nil) updated value as an interface{}
+	// to be marshalled to JSON.
+	interfaceValue() interface{}
 }
 
 // getKeyName tries to extract the marshalled key name from a struct field and
