@@ -164,6 +164,16 @@ func (u SliceUpdate[T]) String() string {
 	return fmt.Sprintf("%v", u.value)
 }
 
+// Equal returns whether u and other perform the same type of operation and, if
+// both are set operations, set to values that are element-wise equal using the
+// == operator. This method is a quasi-standard mechanism to define custom
+// equality. For instance, the time package defines a similar method
+// (https://pkg.go.dev/github.com/google/go-cmp/cmp#Equal), and
+// https://github.com/google/go-cmp respects methods of this form.
+func (u SliceUpdate[T]) Equal(other SliceUpdate[T]) bool {
+	return u.op == other.op && sliceEquals(u.value, other.value)
+}
+
 // interfaceValue, along with IsChange, implements updateMarshaller, which
 // nup.MarshalJSON uses to detect update types and marshal them correctly.
 func (u SliceUpdate[T]) interfaceValue() interface{} {

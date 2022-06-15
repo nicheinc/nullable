@@ -472,3 +472,58 @@ func TestSliceUpdate_String(t *testing.T) {
 		})
 	}
 }
+
+func TestSliceUpdate_Equal(t *testing.T) {
+	testCases := []struct {
+		name     string
+		first    SliceUpdate[int]
+		second   SliceUpdate[int]
+		expected bool
+	}{
+		{
+			name:     "Equal/Noop",
+			first:    SliceNoop[int](),
+			second:   SliceNoop[int](),
+			expected: true,
+		},
+		{
+			name:     "Equal/Remove",
+			first:    SliceRemove[int](),
+			second:   SliceRemove[int](),
+			expected: true,
+		},
+		{
+			name:     "Equal/Set",
+			first:    SliceRemoveOrSet(testSlice1),
+			second:   SliceRemoveOrSet(testSlice1),
+			expected: true,
+		},
+		{
+			name:     "NotEqual/Noop/Remove",
+			first:    SliceNoop[int](),
+			second:   SliceRemove[int](),
+			expected: false,
+		},
+		{
+			name:     "NotEqual/Remove/Set",
+			first:    SliceRemove[int](),
+			second:   SliceRemoveOrSet(testSlice1),
+			expected: false,
+		},
+		{
+			name:     "NotEqual/Set/Noop",
+			first:    SliceRemoveOrSet(testSlice1),
+			second:   SliceNoop[int](),
+			expected: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.first.Equal(testCase.second)
+			if actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}

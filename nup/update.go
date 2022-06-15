@@ -166,6 +166,15 @@ func (u Update[T]) String() string {
 	}
 }
 
+// Equal compares u with other using the == operator. This method is a
+// quasi-standard mechanism to define custom equality. For instance, the time
+// package defines a similar method
+// (https://pkg.go.dev/github.com/google/go-cmp/cmp#Equal), and
+// https://github.com/google/go-cmp respects methods of this form.
+func (u Update[T]) Equal(other Update[T]) bool {
+	return u == other
+}
+
 // interfaceValue, along with IsChange, implements updateMarshaller, which
 // nup.MarshalJSON uses to detect update types and marshal them correctly.
 func (u Update[T]) interfaceValue() interface{} {
