@@ -116,6 +116,22 @@ func (u Update[T]) Apply(value T) T {
 	}
 }
 
+// ApplyPtr returns the result of applying the update to the given pointer
+// value. The result is the given value if the update is a no-op, nil if it's a
+// removal, or a copy of the update's contained value if it's a set operation.
+func (u Update[T]) ApplyPtr(value *T) *T {
+	switch u.op {
+	case OpNoop:
+		return value
+	case OpRemove:
+		return nil
+	default: // Set
+		// Copy the update value so it can't be mutated via the returned pointer.
+		value := u.value
+		return &value
+	}
+}
+
 // Diff returns the update itself if Apply(value) != value; otherwise it returns
 // a no-op update. Diff can be used to omit extraneous updates when applying
 // them would have no effect.
@@ -124,6 +140,20 @@ func (u Update[T]) Diff(value T) Update[T] {
 		return Noop[T]()
 	}
 	return u
+}
+
+// DiffPtr returns the update itself if ApplyPtr(value) does not contain a value
+// equal to the given value; otherwise it returns a no-op update. DiffPtr can be
+// used to omit extraneous updates when applying them would have no effect.
+func (u Update[T]) DiffPtr(value *T) Update[T] {
+	applied := u.ApplyPtr(value)
+	if applied == nil || value == nil {
+		if applied == value {
+			return Noop[T]()
+		}
+		return u
+	}
+	return u.Diff(*value)
 }
 
 // UnmarshalJSON implements json.Unmarshaler.

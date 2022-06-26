@@ -43,7 +43,7 @@ func TestUpdate_UnmarshalJSON(t *testing.T) {
 			if err := json.Unmarshal([]byte(testCase.json), &dst); err != nil {
 				t.Errorf("Error unmarshaling JSON: %s", err)
 			}
-			if !reflect.DeepEqual(dst.Update, testCase.expected) {
+			if dst.Update != testCase.expected {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, dst.Update)
 			}
 		})
@@ -293,6 +293,42 @@ func TestUpdate_Apply(t *testing.T) {
 	}
 }
 
+func TestUpdate_ApplyPtr(t *testing.T) {
+	var (
+		value1 = 1
+		value2 = 2
+	)
+	testCases := []struct {
+		name     string
+		update   Update[int]
+		expected *int
+	}{
+		{
+			name:     "Noop",
+			update:   Noop[int](),
+			expected: &value1,
+		},
+		{
+			name:     "Remove",
+			update:   Remove[int](),
+			expected: nil,
+		},
+		{
+			name:     "Set",
+			update:   Set(value2),
+			expected: &value2,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.update.ApplyPtr(&value1); !reflect.DeepEqual(actual, testCase.expected) {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
 func TestUpdate_Diff(t *testing.T) {
 	var (
 		value1 = 1
@@ -319,7 +355,7 @@ func TestUpdate_Diff(t *testing.T) {
 		{
 			name:     "Remove/ZeroValue",
 			update:   Remove[int](),
-			value:    0.0,
+			value:    0,
 			expected: Noop[int](),
 		},
 		{
@@ -338,7 +374,66 @@ func TestUpdate_Diff(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.Diff(testCase.value); !reflect.DeepEqual(actual, testCase.expected) {
+			if actual := testCase.update.Diff(testCase.value); actual != testCase.expected {
+				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
+			}
+		})
+	}
+}
+
+func TestUpdate_DiffPtr(t *testing.T) {
+	var (
+		zero   = 0
+		value1 = 1
+		value2 = 2
+	)
+	testCases := []struct {
+		name     string
+		update   Update[int]
+		value    *int
+		expected Update[int]
+	}{
+		{
+			name:     "Noop",
+			update:   Noop[int](),
+			value:    &value1,
+			expected: Noop[int](),
+		},
+		{
+			name:     "Remove/ZeroValue",
+			update:   Remove[int](),
+			value:    &zero,
+			expected: Remove[int](),
+		},
+		{
+			name:     "Remove/NonZeroValue",
+			update:   Remove[int](),
+			value:    &value1,
+			expected: Remove[int](),
+		},
+		{
+			name:     "Remove/Nil",
+			update:   Remove[int](),
+			value:    nil,
+			expected: Noop[int](),
+		},
+		{
+			name:     "Set/Equal",
+			update:   Set(value1),
+			value:    &value1,
+			expected: Noop[int](),
+		},
+		{
+			name:     "Set/NotEqual",
+			update:   Set(value2),
+			value:    &value1,
+			expected: Set(value2),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if actual := testCase.update.DiffPtr(testCase.value); actual != testCase.expected {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
