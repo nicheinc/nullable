@@ -51,7 +51,7 @@ func TestSliceUpdate_UnmarshalJSON(t *testing.T) {
 			if err := json.Unmarshal([]byte(testCase.json), &dst); err != nil {
 				t.Errorf("Error unmarshaling JSON: %s", err)
 			}
-			if !reflect.DeepEqual(dst.Update, testCase.expected) {
+			if !dst.Update.Equal(testCase.expected) {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, dst.Update)
 			}
 		})
@@ -84,7 +84,7 @@ func TestSliceRemoveOrSet(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := SliceRemoveOrSet(testCase.value)
-			if !reflect.DeepEqual(actual, testCase.expected) {
+			if !actual.Equal(testCase.expected) {
 				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
 			}
 		})
