@@ -147,13 +147,15 @@ func (u Update[T]) Diff(value T) Update[T] {
 // used to omit extraneous updates when applying them would have no effect.
 func (u Update[T]) DiffPtr(value *T) Update[T] {
 	applied := u.ApplyPtr(value)
-	if applied == nil || value == nil {
-		if applied == value {
-			return Noop[T]()
-		}
+	switch {
+	case applied == nil && value == nil:
+		return Noop[T]()
+	case applied == nil || value == nil:
 		return u
+	default:
+		return u.Diff(*value)
 	}
-	return u.Diff(*value)
+
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
