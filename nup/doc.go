@@ -3,7 +3,7 @@ Package nup (think "nullable update") provides types representing updates to
 struct fields, distinguishing between no-ops, removals, and modifications when
 marshalling those updates to/from JSON.
 
-Motivation
+# Motivation
 
 It's often useful to define data updates using JSON objects, where each
 key-value pair represents an update to a field, using null to indicate deletion.
@@ -20,7 +20,7 @@ the JSON output, i.e. removed.
 The Update and SliceUpdate types distinguish between no-op and removal updates,
 allowing them to correctly and seamlessly unmarshal themselves from JSON.
 
-Marshalling
+# Marshalling
 
 Unfortunately, the default JSON marshaller is unaware of nup types, and
 providing a MarshalJSON implementation in the types themselves is insufficient

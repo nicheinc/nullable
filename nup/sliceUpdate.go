@@ -62,6 +62,11 @@ func (u SliceUpdate[T]) IsNoop() bool {
 	return u.op == OpNoop
 }
 
+// IsZero is equivalent to IsNoop.
+func (u SliceUpdate[T]) IsZero() bool {
+	return u.IsNoop()
+}
+
 // IsRemove returns whether this update is a remove operation. IsRemove is
 // equivalent to Operation() == OpRemove.
 func (u SliceUpdate[T]) IsRemove() bool {
