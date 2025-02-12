@@ -123,6 +123,14 @@ func (u SliceUpdate[T]) Diff(value []T) SliceUpdate[T] {
 	return u
 }
 
+// MarshalJSON implements json.Marshaler.
+func (u SliceUpdate[T]) MarshalJSON() ([]byte, error) {
+	if u.op == OpSet {
+		return json.Marshal(u.value)
+	}
+	return []byte("null"), nil
+}
+
 // UnmarshalJSON implements json.Unmarshaler.
 func (u *SliceUpdate[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {

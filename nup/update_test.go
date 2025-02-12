@@ -3,14 +3,44 @@ package nup
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"testing"
+
+	"github.com/nicheinc/expect"
 )
 
 var testValue = 42
 
 // Ensure implementation of the updateMarshaller interface.
 var _ updateMarshaller = &Update[int]{}
+
+func TestUpdate_MarshalJSON(t *testing.T) {
+	type testCase struct {
+		update   Update[int]
+		expected string
+	}
+	run := func(name string, testCase testCase) {
+		t.Helper()
+		t.Run(name, func(t *testing.T) {
+			t.Helper()
+			actual, err := json.Marshal(testCase.update)
+			expect.ErrorNil(t, err)
+			expect.Equal(t, string(actual), testCase.expected)
+		})
+	}
+
+	run("Noop", testCase{
+		update:   Noop[int](),
+		expected: "null",
+	})
+	run("Remove", testCase{
+		update:   Remove[int](),
+		expected: "null",
+	})
+	run("Set", testCase{
+		update:   Set[int](testValue),
+		expected: "42",
+	})
+}
 
 func TestUpdate_UnmarshalJSON(t *testing.T) {
 	testCases := []struct {
@@ -40,12 +70,9 @@ func TestUpdate_UnmarshalJSON(t *testing.T) {
 			var dst struct {
 				Update Update[int] `json:"update"`
 			}
-			if err := json.Unmarshal([]byte(testCase.json), &dst); err != nil {
-				t.Errorf("Error unmarshaling JSON: %s", err)
-			}
-			if dst.Update != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, dst.Update)
-			}
+			err := json.Unmarshal([]byte(testCase.json), &dst)
+			expect.ErrorNil(t, err)
+			expect.Equal(t, dst.Update, testCase.expected)
 		})
 	}
 }
@@ -80,9 +107,7 @@ func TestRemoveOrSet(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := RemoveOrSet(testCase.ptr)
-			if actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -117,12 +142,8 @@ func TestUpdate_ValueOperation(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			actualValue, actualOp := testCase.update.ValueOperation()
-			if actualValue != testCase.expectedValue {
-				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, actualValue)
-			}
-			if actualOp != testCase.expectedOp {
-				t.Errorf("Expected operation: %v. Actual: %v", testCase.expectedOp, actualOp)
-			}
+			expect.Equal(t, actualValue, testCase.expectedValue)
+			expect.Equal(t, actualOp, testCase.expectedOp)
 		})
 	}
 }
@@ -133,6 +154,7 @@ func TestUpdate_OperationAccessors(t *testing.T) {
 		update           Update[int]
 		expectedOp       Operation
 		expectedIsNoop   bool
+		expectedIsZero   bool
 		expectedIsRemove bool
 		expectedIsSet    bool
 		expectedIsChange bool
@@ -142,6 +164,7 @@ func TestUpdate_OperationAccessors(t *testing.T) {
 			update:         Noop[int](),
 			expectedOp:     OpNoop,
 			expectedIsNoop: true,
+			expectedIsZero: true,
 		},
 		{
 			name:             "Remove",
@@ -161,28 +184,12 @@ func TestUpdate_OperationAccessors(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			var (
-				op       = testCase.update.Operation()
-				isNoop   = testCase.update.IsNoop()
-				isRemove = testCase.update.IsRemove()
-				isSet    = testCase.update.IsSet()
-				isChange = testCase.update.IsChange()
-			)
-			if op != testCase.expectedOp {
-				t.Errorf("Expected Operation(): %v. Actual: %v", testCase.expectedOp, op)
-			}
-			if isNoop != testCase.expectedIsNoop {
-				t.Errorf("Expected IsNoop(): %v. Actual: %v", testCase.expectedIsNoop, isNoop)
-			}
-			if isRemove != testCase.expectedIsRemove {
-				t.Errorf("Expected IsRemove(): %v. Actual: %v", testCase.expectedIsRemove, isRemove)
-			}
-			if isSet != testCase.expectedIsSet {
-				t.Errorf("Expected IsSet(): %v. Actual: %v", testCase.expectedIsSet, isSet)
-			}
-			if isChange != testCase.expectedIsChange {
-				t.Errorf("Expected IsChange(): %v. Actual: %v", testCase.expectedIsChange, isChange)
-			}
+			expect.Equal(t, testCase.update.Operation(), testCase.expectedOp)
+			expect.Equal(t, testCase.update.IsNoop(), testCase.expectedIsNoop)
+			expect.Equal(t, testCase.update.IsZero(), testCase.expectedIsZero)
+			expect.Equal(t, testCase.update.IsRemove(), testCase.expectedIsRemove)
+			expect.Equal(t, testCase.update.IsSet(), testCase.expectedIsSet)
+			expect.Equal(t, testCase.update.IsChange(), testCase.expectedIsChange)
 		})
 	}
 }
@@ -217,12 +224,8 @@ func TestUpdate_Value(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			value, isSet := testCase.update.Value()
-			if value != testCase.expectedValue {
-				t.Errorf("Expected value: %v. Actual: %v", testCase.expectedValue, value)
-			}
-			if isSet != testCase.expectedOK {
-				t.Errorf("Expected isSet: %v. Actual: %v", testCase.expectedOK, isSet)
-			}
+			expect.Equal(t, value, testCase.expectedValue)
+			expect.Equal(t, isSet, testCase.expectedOK)
 		})
 	}
 }
@@ -253,9 +256,7 @@ func TestUpdate_ValueOrNil(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := testCase.update.ValueOrNil()
-			if !reflect.DeepEqual(actual, testCase.expected) {
-				t.Errorf("Expected value: %v. Actual: %v", testCase.expected, actual)
-			}
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -286,9 +287,8 @@ func TestUpdate_Apply(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.Apply(value); actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			actual := testCase.update.Apply(value)
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -322,9 +322,8 @@ func TestUpdate_ApplyPtr(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.ApplyPtr(&value1); !reflect.DeepEqual(actual, testCase.expected) {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			actual := testCase.update.ApplyPtr(&value1)
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -374,9 +373,8 @@ func TestUpdate_Diff(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.Diff(testCase.value); actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			actual := testCase.update.Diff(testCase.value)
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -433,9 +431,8 @@ func TestUpdate_DiffPtr(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.DiffPtr(testCase.value); actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			actual := testCase.update.DiffPtr(testCase.value)
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -471,9 +468,8 @@ func TestUpdate_IsSetTo(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.IsSetTo(value); actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			actual := testCase.update.IsSetTo(value)
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -511,9 +507,8 @@ func TestUpdate_IsSetSuchThat(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.IsSetSuchThat(isNegative); actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			actual := testCase.update.IsSetSuchThat(isNegative)
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -553,9 +548,8 @@ func TestUpdate_String(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			if actual := testCase.update.String(); actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			actual := testCase.update.String()
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -614,9 +608,7 @@ func TestUpdate_Equal(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := testCase.first.Equal(testCase.second)
-			if actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }

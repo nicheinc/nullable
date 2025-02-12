@@ -162,6 +162,14 @@ func (u Update[T]) DiffPtr(value *T) Update[T] {
 	}
 }
 
+// MarshalJSON implements json.Marshaler.
+func (u Update[T]) MarshalJSON() ([]byte, error) {
+	if u.op == OpSet {
+		return json.Marshal(u.value)
+	}
+	return []byte("null"), nil
+}
+
 // UnmarshalJSON implements json.Unmarshaler.
 func (u *Update[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {

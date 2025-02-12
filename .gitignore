@@ -26,5 +26,5 @@ _testmain.go
 # Vim swap files
 *.swp
 
-# Don't apply gitignore rules to vendored projects
-!/vendor/**
+# Vendored files
+/vendor
