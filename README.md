@@ -32,10 +32,12 @@ from JSON.
 
 ## Marshalling
 
-For best results, use the `omitzero` JSON struct tag option on all struct fields
-of type `nup.Update` or `nup.SliceUpdate`. This will ensure that if the field is
-a no-op, it's correctly omitted from the JSON output. (If the `omitzero` tag is
-absent, the field will be marshalled as `null`.)
+For best results, use
+[`json.Marshal`](https://pkg.go.dev/encoding/json#Marshal)'s `omitzero` struct
+tag option on all struct fields of type `nup.Update` or `nup.SliceUpdate`. This
+will ensure that if the field is a no-op, it's correctly omitted from the JSON
+output. (If the `omitzero` tag is absent, the field will be marshalled as
+`null`.)
 
 ## Installation
 
