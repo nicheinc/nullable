@@ -6,10 +6,10 @@ marshalling those updates to/from JSON.
 # Motivation
 
 It's often useful to define data updates using JSON objects, where each
-key-value pair represents an update to a field, using null to indicate deletion.
-If a certain key is not present, the corresponding field is not modified. We
-want to define go structs corresponding to these updates, which need to be
-marshalled to/from JSON.
+key-value pair represents an update to a field, using a value of null to
+indicate deletion. If a certain key is not present, the corresponding field is
+not modified. We want to define go structs corresponding to these updates, which
+need to be marshalled to/from JSON.
 
 If we were to use pointer fields with the omitzero JSON struct tag option for
 these structs, then fields explicitly set to nil to be removed would instead
