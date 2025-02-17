@@ -62,6 +62,11 @@ func (u SliceUpdate[T]) IsNoop() bool {
 	return u.op == OpNoop
 }
 
+// IsZero is equivalent to IsNoop.
+func (u SliceUpdate[T]) IsZero() bool {
+	return u.IsNoop()
+}
+
 // IsRemove returns whether this update is a remove operation. IsRemove is
 // equivalent to Operation() == OpRemove.
 func (u SliceUpdate[T]) IsRemove() bool {
@@ -116,6 +121,14 @@ func (u SliceUpdate[T]) Diff(value []T) SliceUpdate[T] {
 		return SliceNoop[T]()
 	}
 	return u
+}
+
+// MarshalJSON implements json.Marshaler.
+func (u SliceUpdate[T]) MarshalJSON() ([]byte, error) {
+	if u.op == OpSet {
+		return json.Marshal(u.value)
+	}
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.

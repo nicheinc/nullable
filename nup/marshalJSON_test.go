@@ -3,8 +3,9 @@ package nup
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/nicheinc/expect"
 )
 
 func TestMarshalJSON_OneWay(t *testing.T) {
@@ -209,13 +210,9 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			data, err := MarshalJSON(testCase.input)
-			if err != nil {
-				t.Errorf("Error while marshalling: %v", err)
-			}
+			expect.ErrorNil(t, err)
 			actual := string(data)
-			if actual != testCase.expected {
-				t.Errorf("Expected: %v. Actual: %v", testCase.expected, actual)
-			}
+			expect.Equal(t, actual, testCase.expected)
 		})
 	}
 }
@@ -305,19 +302,14 @@ func roundtrip[T any](t *testing.T, testName string, input T) {
 	t.Run(testName, func(t *testing.T) {
 		t.Helper()
 		// Marshal input.
-		data, err := MarshalJSON(input)
-		if err != nil {
-			t.Errorf("Error while marshalling: %v", err)
-		}
+		data, marshalErr := MarshalJSON(input)
+		expect.ErrorNil(t, marshalErr)
 		// Unmarshal resulting JSON to output.
 		var output T
-		if err := json.Unmarshal(data, &output); err != nil {
-			t.Errorf("Error while unmarshalling: %v", err)
-		}
+		unmarshalErr := json.Unmarshal(data, &output)
+		expect.ErrorNil(t, unmarshalErr)
 		// Marshalling then unmarshalling should result in the same value.
-		if !reflect.DeepEqual(input, output) {
-			t.Errorf("Expected: %v. Actual: %v", input, output)
-		}
+		expect.Equal(t, input, output)
 	})
 }
 
@@ -355,12 +347,8 @@ func TestMarshalJSON_FieldErrors(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			data, err := MarshalJSON(testCase.input)
-			if data != nil {
-				t.Errorf("Expected nil data. Actual: %v", string(data))
-			}
-			if err == nil {
-				t.Error("Expected a non-nil error")
-			}
+			expect.ErrorNonNil(t, err)
+			expect.Equal(t, data, nil)
 		})
 	}
 }

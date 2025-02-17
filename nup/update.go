@@ -65,6 +65,11 @@ func (u Update[T]) IsNoop() bool {
 	return u.op == OpNoop
 }
 
+// IsZero is equivalent to IsNoop.
+func (u Update[T]) IsZero() bool {
+	return u.IsNoop()
+}
+
 // IsRemove returns whether this update is a remove operation. IsRemove is
 // equivalent to Operation() == OpRemove.
 func (u Update[T]) IsRemove() bool {
@@ -155,7 +160,14 @@ func (u Update[T]) DiffPtr(value *T) Update[T] {
 	default:
 		return u.Diff(*value)
 	}
+}
 
+// MarshalJSON implements json.Marshaler.
+func (u Update[T]) MarshalJSON() ([]byte, error) {
+	if u.op == OpSet {
+		return json.Marshal(u.value)
+	}
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.

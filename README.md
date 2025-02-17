@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/nicheinc/nullable/actions/workflows/ci.yml/badge.svg)](https://github.com/nicheinc/nullable/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nicheinc/nullable)](https://goreportcard.com/report/github.com/nicheinc/nullable)
-[![Godoc](https://godoc.org/github.com/nicheinc/nullable?status.svg)](https://godoc.org/github.com/nicheinc/nullable) 
+[![Godoc](https://godoc.org/github.com/nicheinc/nullable?status.svg)](https://godoc.org/github.com/nicheinc/nullable)
 [![license](https://img.shields.io/github/license/nicheinc/nullable.svg?cacheSeconds=2592000)](LICENSE)
 
 This package provides types representing updates to struct fields,
@@ -20,15 +20,24 @@ indicate deletion. If a certain key is not present, the corresponding field is
 not modified. We want to define go structs corresponding to these updates, which
 need to be marshalled to/from JSON.
 
-If we were to use pointer fields with the `omitempty` JSON struct tag option for
+If we were to use pointer fields with the `omitzero` JSON struct tag option for
 these structs, then fields explicitly set to `nil` to be removed would instead
 simply be absent from the marshalled JSON, i.e. unchanged. If we were to use
-pointer fields without `omitempty`, then `nil` fields would be present and
-`null` in the JSON output, i.e. removed.
+pointer fields without `omitzero`, then `nil` fields would be present and `null`
+in the JSON output, i.e. removed.
 
-The `Update` and `SliceUpdate` types distinguish between no-op and removal
-updates, allowing them to correctly and seamlessly unmarshal themselves from
-JSON.
+The `nup.Update` and `nup.SliceUpdate` types distinguish between no-op and
+removal updates, allowing them to correctly and seamlessly unmarshal themselves
+from JSON.
+
+## Marshalling
+
+For best results, use
+[`json.Marshal`](https://pkg.go.dev/encoding/json#Marshal)'s `omitzero` struct
+tag option on all struct fields of type `nup.Update` or `nup.SliceUpdate`. This
+will ensure that if the field is a no-op, it's correctly omitted from the JSON
+output. (If the `omitzero` tag is absent, the field will be marshalled as
+`null`.)
 
 ## Installation
 
