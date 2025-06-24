@@ -7,5 +7,4 @@ on:
 jobs:
   ci:
     name: Build, Test, and Lint
-    uses: nicheinc/actions-go-ci-library/.github/workflows/action.yaml@v1
-    secrets: inherit
+    uses: nicheinc/actions-go-ci-library/.github/workflows/action.yaml@v2
