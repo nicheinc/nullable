@@ -1,0 +1,10 @@
+# Snyk (https://snyk.io) policy file
+---
+exclude:
+  # Exclusion syntax: https://docs.snyk.io/scan-with-snyk/import-project-repository/exclude-directories-and-files-from-project-import#syntax-to-use-to-exclude-files-and-directories-from-snyk-code-testing
+  global:
+    # The vendor directory corresponds to the go.mod, which Snyk already scans
+    # for vulnerable versions of dependencies.
+    - vendor
+    # Test files are excluded from non-test builds and cannot affect production.
+    - "*_test.go"
