@@ -241,7 +241,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 		NoTag: 1,
 	})
 	roundtrip(t, "EmptyName", struct {
-		EmptyName int `json:","`
+		EmptyName int `json:""`
 	}{
 		EmptyName: 1,
 	})
