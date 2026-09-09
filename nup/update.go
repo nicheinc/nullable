@@ -225,7 +225,7 @@ func (u Update[T]) String() string {
 	case OpRemove:
 		return "<remove>"
 	}
-	switch value := interface{}(u.value).(type) {
+	switch value := any(u.value).(type) {
 	case string:
 		return value
 	case fmt.Stringer:
@@ -246,7 +246,7 @@ func (u Update[T]) Equal(other Update[T]) bool {
 
 // interfaceValue, along with IsChange, implements updateMarshaller, which
 // nup.MarshalJSON uses to detect update types and marshal them correctly.
-func (u Update[T]) interfaceValue() interface{} {
+func (u Update[T]) interfaceValue() any {
 	if u.op == OpSet {
 		return u.value
 	}

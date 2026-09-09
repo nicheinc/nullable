@@ -214,7 +214,7 @@ func (u SliceUpdate[T]) Equal(other SliceUpdate[T]) bool {
 
 // interfaceValue, along with IsChange, implements updateMarshaller, which
 // nup.MarshalJSON uses to detect update types and marshal them correctly.
-func (u SliceUpdate[T]) interfaceValue() interface{} {
+func (u SliceUpdate[T]) interfaceValue() any {
 	if u.op == OpSet {
 		return u.value
 	}
