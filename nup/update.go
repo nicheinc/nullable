@@ -1,7 +1,9 @@
 package nup
 
 import (
-	"encoding/json"
+	jsonv1 "encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 )
 
@@ -162,22 +164,45 @@ func (u Update[T]) DiffPtr(value *T) Update[T] {
 	}
 }
 
-// MarshalJSON implements json.Marshaler.
+// Deprecated: Use [Update.MarshalJSONTo].
+//
+// MarshalJSON implements [jsonv1.Marshaler].
 func (u Update[T]) MarshalJSON() ([]byte, error) {
 	if u.op == OpSet {
-		return json.Marshal(u.value)
+		return jsonv1.Marshal(u.value)
 	}
 	return []byte("null"), nil
 }
 
-// UnmarshalJSON implements json.Unmarshaler.
+// MarshalJSONTo implements [json.MarshalerTo].
+func (u Update[T]) MarshalJSONTo(encoder *jsontext.Encoder) error {
+	if u.op == OpSet {
+		return json.MarshalEncode(encoder, u.value)
+	}
+	return encoder.WriteToken(jsontext.Null)
+}
+
+// Deprecated: Use [Update.UnmarshalJSONFrom].
+//
+// UnmarshalJSON implements [jsonv1.Unmarshaler].
 func (u *Update[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		u.op = OpRemove
 		return nil
 	}
 	u.op = OpSet
-	return json.Unmarshal(data, &u.value)
+	return jsonv1.Unmarshal(data, &u.value)
+}
+
+// UnmarshalJSONFrom implements [json.UnmarshalerFrom].
+func (u *Update[T]) UnmarshalJSONFrom(decoder *jsontext.Decoder) error {
+	if decoder.PeekKind() == jsontext.KindNull {
+		decoder.ReadToken()
+		u.op = OpRemove
+		return nil
+	}
+	u.op = OpSet
+	return json.UnmarshalDecode(decoder, &u.value)
 }
 
 // IsSetTo returns whether the update sets to the given value.
