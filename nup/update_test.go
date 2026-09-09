@@ -1,7 +1,7 @@
 package nup
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"testing"
 
@@ -14,6 +14,35 @@ var testValue = 42
 var _ updateMarshaller = &Update[int]{}
 
 func TestUpdate_MarshalJSON(t *testing.T) {
+	type testCase struct {
+		update   Update[int]
+		expected string
+	}
+	run := func(name string, testCase testCase) {
+		t.Helper()
+		t.Run(name, func(t *testing.T) {
+			t.Helper()
+			actual, err := testCase.update.MarshalJSON()
+			expect.ErrorNil(t, err)
+			expect.Equal(t, string(actual), testCase.expected)
+		})
+	}
+
+	run("Noop", testCase{
+		update:   Noop[int](),
+		expected: "null",
+	})
+	run("Remove", testCase{
+		update:   Remove[int](),
+		expected: "null",
+	})
+	run("Set", testCase{
+		update:   Set(testValue),
+		expected: "42",
+	})
+}
+
+func TestUpdate_MarshalJSONTo(t *testing.T) {
 	type testCase struct {
 		update   Update[int]
 		expected string
@@ -37,44 +66,89 @@ func TestUpdate_MarshalJSON(t *testing.T) {
 		expected: "null",
 	})
 	run("Set", testCase{
-		update:   Set[int](testValue),
+		update:   Set(testValue),
 		expected: "42",
 	})
 }
 
 func TestUpdate_UnmarshalJSON(t *testing.T) {
-	testCases := []struct {
-		name     string
-		json     string
-		expected Update[int]
-	}{
-		{
-			name:     "EmptyJSONObject",
-			json:     `{}`,
-			expected: Noop[int](),
-		},
-		{
-			name:     "NullUpdate",
-			json:     `{"update": null}`,
-			expected: Remove[int](),
-		},
-		{
-			name:     "ValueUpdate",
-			json:     fmt.Sprintf(`{"update": %v}`, testValue),
-			expected: Set(testValue),
-		},
+	type testCase struct {
+		json       string
+		expected   Update[int]
+		errorCheck expect.ErrorCheck
+	}
+	run := func(name string, testCase testCase) {
+		t.Helper()
+		t.Run(name, func(t *testing.T) {
+			t.Helper()
+			var update Update[int]
+			err := update.UnmarshalJSON([]byte(testCase.json))
+			testCase.errorCheck(t, err)
+			expect.Equal(t, update, testCase.expected)
+		})
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
+	run("MalformedNull", testCase{
+		json:       `nup`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNonNil,
+	})
+	run("Null", testCase{
+		json:       `null`,
+		expected:   Remove[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("Value", testCase{
+		json:       fmt.Sprint(testValue),
+		expected:   Set(testValue),
+		errorCheck: expect.ErrorNil,
+	})
+}
+
+func TestUpdate_UnmarshalJSONFrom(t *testing.T) {
+	type testCase struct {
+		json       string
+		expected   Update[int]
+		errorCheck expect.ErrorCheck
+	}
+	run := func(name string, testCase testCase) {
+		t.Helper()
+		t.Run(name, func(t *testing.T) {
+			t.Helper()
 			var dst struct {
 				Update Update[int] `json:"update"`
 			}
 			err := json.Unmarshal([]byte(testCase.json), &dst)
-			expect.ErrorNil(t, err)
+			testCase.errorCheck(t, err)
 			expect.Equal(t, dst.Update, testCase.expected)
 		})
 	}
+
+	run("EmptyJSONObject", testCase{
+		json:       `{}`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("MalformedNullUpdate", testCase{
+		json:       `{"update": nup}`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNonNil,
+	})
+	run("NullUpdate", testCase{
+		json:       `{"update": null}`,
+		expected:   Remove[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("MalformedValueUpdate", testCase{
+		json:       `{"update": invalid}`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNonNil,
+	})
+	run("ValueUpdate", testCase{
+		json:       fmt.Sprintf(`{"update": %v}`, testValue),
+		expected:   Set(testValue),
+		errorCheck: expect.ErrorNil,
+	})
 }
 
 func TestRemoveOrSet(t *testing.T) {

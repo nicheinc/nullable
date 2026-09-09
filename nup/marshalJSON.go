@@ -14,7 +14,7 @@ import (
 // Any struct that contains Update or SliceUpdate fields should call this
 // function instead of the default json.Marshal. For more info, see
 // https://pkg.go.dev/github.com/nicheinc/nullable/#hdr-Marshalling.
-func MarshalJSON(v interface{}) ([]byte, error) {
+func MarshalJSON(v any) ([]byte, error) {
 	// Marshal nil as null.
 	if v == nil {
 		return []byte("null"), nil
@@ -46,7 +46,7 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 		if key == nil {
 			continue
 		}
-		appendField := func(fieldInterface interface{}) error {
+		appendField := func(fieldInterface any) error {
 			valueBuf, err := json.Marshal(fieldInterface)
 			if err != nil {
 				return err
@@ -96,7 +96,7 @@ type updateMarshaller interface {
 	IsChange() bool
 	// interfaceValue returns the (possibly nil) updated value as an interface{}
 	// to be marshalled to JSON.
-	interfaceValue() interface{}
+	interfaceValue() any
 }
 
 // getKeyName tries to extract the marshalled key name from a struct field and
@@ -182,7 +182,7 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Uint() == 0
 	case reflect.Float32, reflect.Float64:
 		return v.Float() == 0
-	case reflect.Interface, reflect.Ptr:
+	case reflect.Interface, reflect.Pointer:
 		return v.IsNil()
 	}
 	return false

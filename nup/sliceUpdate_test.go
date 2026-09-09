@@ -1,7 +1,7 @@
 package nup
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"testing"
 
@@ -25,6 +25,35 @@ func TestSliceUpdate_MarshalJSON(t *testing.T) {
 		t.Helper()
 		t.Run(name, func(t *testing.T) {
 			t.Helper()
+			actual, err := testCase.update.MarshalJSON()
+			expect.ErrorNil(t, err)
+			expect.Equal(t, string(actual), testCase.expected)
+		})
+	}
+
+	run("Noop", testCase{
+		update:   SliceNoop[int](),
+		expected: "null",
+	})
+	run("Remove", testCase{
+		update:   SliceRemove[int](),
+		expected: "null",
+	})
+	run("Set", testCase{
+		update:   SliceRemoveOrSet(testSlice1),
+		expected: "[1]",
+	})
+}
+
+func TestSliceUpdate_MarshalJSONTo(t *testing.T) {
+	type testCase struct {
+		update   SliceUpdate[int]
+		expected string
+	}
+	run := func(name string, testCase testCase) {
+		t.Helper()
+		t.Run(name, func(t *testing.T) {
+			t.Helper()
 			actual, err := json.Marshal(testCase.update)
 			expect.ErrorNil(t, err)
 			expect.Equal(t, string(actual), testCase.expected)
@@ -40,49 +69,99 @@ func TestSliceUpdate_MarshalJSON(t *testing.T) {
 		expected: "null",
 	})
 	run("Set", testCase{
-		update:   SliceRemoveOrSet[int](testSlice1),
+		update:   SliceRemoveOrSet(testSlice1),
 		expected: "[1]",
 	})
 }
 
 func TestSliceUpdate_UnmarshalJSON(t *testing.T) {
-	testCases := []struct {
-		name     string
-		json     string
-		expected SliceUpdate[int]
-	}{
-		{
-			name:     "EmptyJSONObject",
-			json:     `{}`,
-			expected: SliceNoop[int](),
-		},
-		{
-			name:     "NullUpdate",
-			json:     `{"update": null}`,
-			expected: SliceRemove[int](),
-		},
-		{
-			name:     "EmptyUpdate",
-			json:     `{"update": []}`,
-			expected: SliceRemoveOrSet([]int{}),
-		},
-		{
-			name:     "NonemptyUpdate",
-			json:     fmt.Sprintf(`{"update": %v}`, testSlice1),
-			expected: SliceRemoveOrSet(testSlice1),
-		},
+	type testCase struct {
+		json       string
+		expected   SliceUpdate[int]
+		errorCheck expect.ErrorCheck
+	}
+	run := func(name string, testCase testCase) {
+		t.Helper()
+		t.Run(name, func(t *testing.T) {
+			t.Helper()
+			var update SliceUpdate[int]
+			err := update.UnmarshalJSON([]byte(testCase.json))
+			testCase.errorCheck(t, err)
+			expect.Equal(t, update, testCase.expected)
+		})
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
+	run("MalformedNull", testCase{
+		json:       `nup`,
+		expected:   SliceNoop[int](),
+		errorCheck: expect.ErrorNonNil,
+	})
+	run("Null", testCase{
+		json:       `null`,
+		expected:   SliceRemove[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("Empty", testCase{
+		json:       `[]`,
+		expected:   SliceRemoveOrSet([]int{}),
+		errorCheck: expect.ErrorNil,
+	})
+	run("Nonempty", testCase{
+		json:       fmt.Sprint(testSlice1),
+		expected:   SliceRemoveOrSet(testSlice1),
+		errorCheck: expect.ErrorNil,
+	})
+}
+
+func TestSliceUpdate_UnmarshalJSONFrom(t *testing.T) {
+	type testCase struct {
+		json       string
+		expected   SliceUpdate[int]
+		errorCheck expect.ErrorCheck
+	}
+	run := func(name string, testCase testCase) {
+		t.Helper()
+		t.Run(name, func(t *testing.T) {
+			t.Helper()
 			var dst struct {
 				Update SliceUpdate[int] `json:"update"`
 			}
 			err := json.Unmarshal([]byte(testCase.json), &dst)
-			expect.ErrorNil(t, err)
+			testCase.errorCheck(t, err)
 			expect.Equal(t, dst.Update, testCase.expected)
 		})
 	}
+
+	run("EmptyJSONObject", testCase{
+		json:       `{}`,
+		expected:   SliceNoop[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("MalformedNullUpdate", testCase{
+		json:       `{"update": nup}`,
+		expected:   SliceNoop[int](),
+		errorCheck: expect.ErrorNonNil,
+	})
+	run("NullUpdate", testCase{
+		json:       `{"update": null}`,
+		expected:   SliceRemove[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("EmptyUpdate", testCase{
+		json:       `{"update": []}`,
+		expected:   SliceRemoveOrSet([]int{}),
+		errorCheck: expect.ErrorNil,
+	})
+	run("MalformedNonemptyUpdate", testCase{
+		json:       `{"update": invalid}`,
+		expected:   SliceNoop[int](),
+		errorCheck: expect.ErrorNonNil,
+	})
+	run("NonemptyUpdate", testCase{
+		json:       fmt.Sprintf(`{"update": %v}`, testSlice1),
+		expected:   SliceRemoveOrSet(testSlice1),
+		errorCheck: expect.ErrorNil,
+	})
 }
 
 func TestSliceRemoveOrSet(t *testing.T) {

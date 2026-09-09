@@ -1,7 +1,9 @@
 package nup
 
 import (
-	"encoding/json"
+	jsonv1 "encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 )
 
@@ -162,22 +164,55 @@ func (u Update[T]) DiffPtr(value *T) Update[T] {
 	}
 }
 
-// MarshalJSON implements json.Marshaler.
+// Deprecated: Use [Update.MarshalJSONTo].
+//
+// MarshalJSON implements [jsonv1.Marshaler].
 func (u Update[T]) MarshalJSON() ([]byte, error) {
 	if u.op == OpSet {
-		return json.Marshal(u.value)
+		return jsonv1.Marshal(u.value)
 	}
 	return []byte("null"), nil
 }
 
-// UnmarshalJSON implements json.Unmarshaler.
+// MarshalJSONTo implements [json.MarshalerTo].
+func (u Update[T]) MarshalJSONTo(encoder *jsontext.Encoder) error {
+	if u.op == OpSet {
+		return json.MarshalEncode(encoder, u.value)
+	}
+	return encoder.WriteToken(jsontext.Null)
+}
+
+// Deprecated: Use [Update.UnmarshalJSONFrom].
+//
+// UnmarshalJSON implements [jsonv1.Unmarshaler].
 func (u *Update[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		u.op = OpRemove
+		*u = Remove[T]()
 		return nil
 	}
-	u.op = OpSet
-	return json.Unmarshal(data, &u.value)
+	var value T
+	if unmarshalErr := jsonv1.Unmarshal(data, &value); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	*u = Set(value)
+	return nil
+}
+
+// UnmarshalJSONFrom implements [json.UnmarshalerFrom].
+func (u *Update[T]) UnmarshalJSONFrom(decoder *jsontext.Decoder) error {
+	if decoder.PeekKind() == jsontext.KindNull {
+		if _, readErr := decoder.ReadToken(); readErr != nil {
+			return readErr
+		}
+		*u = Remove[T]()
+		return nil
+	}
+	var value T
+	if unmarshalErr := json.UnmarshalDecode(decoder, &value); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	*u = Set(value)
+	return nil
 }
 
 // IsSetTo returns whether the update sets to the given value.
@@ -200,7 +235,7 @@ func (u Update[T]) String() string {
 	case OpRemove:
 		return "<remove>"
 	}
-	switch value := interface{}(u.value).(type) {
+	switch value := any(u.value).(type) {
 	case string:
 		return value
 	case fmt.Stringer:
@@ -221,7 +256,7 @@ func (u Update[T]) Equal(other Update[T]) bool {
 
 // interfaceValue, along with IsChange, implements updateMarshaller, which
 // nup.MarshalJSON uses to detect update types and marshal them correctly.
-func (u Update[T]) interfaceValue() interface{} {
+func (u Update[T]) interfaceValue() any {
 	if u.op == OpSet {
 		return u.value
 	}

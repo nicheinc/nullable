@@ -11,7 +11,7 @@ import (
 func TestMarshalJSON_OneWay(t *testing.T) {
 	testCases := []struct {
 		name     string
-		input    interface{}
+		input    any
 		expected string
 	}{
 		{
@@ -75,12 +75,15 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		{
 			name: "Omitempy/Nonempty",
 			input: struct {
-				Slice      []int    `json:",omitempty"`
-				B          bool     `json:",omitempty"`
-				I          int      `json:",omitempty"`
-				U          uint     `json:",omitempty"`
-				F          float32  `json:",omitempty"`
-				Ptr        *int     `json:",omitempty"`
+				Slice []int   `json:",omitempty"`
+				B     bool    `json:",omitempty"`
+				I     int     `json:",omitempty"`
+				U     uint    `json:",omitempty"`
+				F     float32 `json:",omitempty"`
+				Ptr   *int    `json:",omitempty"`
+				// go fix will remove the following struct tag since it doesn't
+				// have any effect on json.Marshal, but that's the behavior
+				// we're trying to reproduce, so this tag should not be removed.
 				NeverEmpty struct{} `json:",omitempty"`
 			}{
 				Slice:      []int{1},
@@ -105,7 +108,7 @@ func TestMarshalJSON_OneWay(t *testing.T) {
 		{
 			name: "EmptyName",
 			input: struct {
-				EmptyName int `json:","`
+				EmptyName int `json:""`
 			}{
 				EmptyName: 1,
 			},
@@ -241,7 +244,7 @@ func TestMarshalJSON_RoundTrip(t *testing.T) {
 		NoTag: 1,
 	})
 	roundtrip(t, "EmptyName", struct {
-		EmptyName int `json:","`
+		EmptyName int `json:""`
 	}{
 		EmptyName: 1,
 	})
@@ -316,7 +319,7 @@ func roundtrip[T any](t *testing.T, testName string, input T) {
 func TestMarshalJSON_FieldErrors(t *testing.T) {
 	testCases := []struct {
 		name  string
-		input interface{}
+		input any
 	}{
 		{
 			name: "NonUpdateField",
