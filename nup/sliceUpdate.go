@@ -148,22 +148,32 @@ func (u SliceUpdate[T]) MarshalJSONTo(encoder *jsontext.Encoder) error {
 // UnmarshalJSON implements [jsonv1.Unmarshaler].
 func (u *SliceUpdate[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		u.op = OpRemove
+		*u = SliceRemove[T]()
 		return nil
 	}
-	u.op = OpSet
-	return jsonv1.Unmarshal(data, &u.value)
+	var value []T
+	if unmarshalErr := jsonv1.Unmarshal(data, &value); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	*u = SliceRemoveOrSet(value)
+	return nil
 }
 
 // UnmarshalJSONFrom implements [json.UnmarshalerFrom].
 func (u *SliceUpdate[T]) UnmarshalJSONFrom(decoder *jsontext.Decoder) error {
 	if decoder.PeekKind() == jsontext.KindNull {
-		decoder.ReadToken()
-		u.op = OpRemove
+		if _, readErr := decoder.ReadToken(); readErr != nil {
+			return readErr
+		}
+		*u = SliceRemove[T]()
 		return nil
 	}
-	u.op = OpSet
-	return json.UnmarshalDecode(decoder, &u.value)
+	var value []T
+	if unmarshalErr := json.UnmarshalDecode(decoder, &value); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	*u = SliceRemoveOrSet(value)
+	return nil
 }
 
 // IsSetTo returns whether the update sets to a value that is element-wise equal

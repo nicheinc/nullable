@@ -187,22 +187,32 @@ func (u Update[T]) MarshalJSONTo(encoder *jsontext.Encoder) error {
 // UnmarshalJSON implements [jsonv1.Unmarshaler].
 func (u *Update[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		u.op = OpRemove
+		*u = Remove[T]()
 		return nil
 	}
-	u.op = OpSet
-	return jsonv1.Unmarshal(data, &u.value)
+	var value T
+	if unmarshalErr := jsonv1.Unmarshal(data, &value); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	*u = Set(value)
+	return nil
 }
 
 // UnmarshalJSONFrom implements [json.UnmarshalerFrom].
 func (u *Update[T]) UnmarshalJSONFrom(decoder *jsontext.Decoder) error {
 	if decoder.PeekKind() == jsontext.KindNull {
-		decoder.ReadToken()
-		u.op = OpRemove
+		if _, readErr := decoder.ReadToken(); readErr != nil {
+			return readErr
+		}
+		*u = Remove[T]()
 		return nil
 	}
-	u.op = OpSet
-	return json.UnmarshalDecode(decoder, &u.value)
+	var value T
+	if unmarshalErr := json.UnmarshalDecode(decoder, &value); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	*u = Set(value)
+	return nil
 }
 
 // IsSetTo returns whether the update sets to the given value.

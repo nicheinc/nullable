@@ -73,8 +73,9 @@ func TestUpdate_MarshalJSONTo(t *testing.T) {
 
 func TestUpdate_UnmarshalJSON(t *testing.T) {
 	type testCase struct {
-		json     string
-		expected Update[int]
+		json       string
+		expected   Update[int]
+		errorCheck expect.ErrorCheck
 	}
 	run := func(name string, testCase testCase) {
 		t.Helper()
@@ -82,25 +83,33 @@ func TestUpdate_UnmarshalJSON(t *testing.T) {
 			t.Helper()
 			var update Update[int]
 			err := update.UnmarshalJSON([]byte(testCase.json))
-			expect.ErrorNil(t, err)
+			testCase.errorCheck(t, err)
 			expect.Equal(t, update, testCase.expected)
 		})
 	}
 
+	run("MalformedNull", testCase{
+		json:       `nup`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNonNil,
+	})
 	run("Null", testCase{
-		json:     `null`,
-		expected: Remove[int](),
+		json:       `null`,
+		expected:   Remove[int](),
+		errorCheck: expect.ErrorNil,
 	})
 	run("Value", testCase{
-		json:     fmt.Sprint(testValue),
-		expected: Set(testValue),
+		json:       fmt.Sprint(testValue),
+		expected:   Set(testValue),
+		errorCheck: expect.ErrorNil,
 	})
 }
 
 func TestUpdate_UnmarshalJSONFrom(t *testing.T) {
 	type testCase struct {
-		json     string
-		expected Update[int]
+		json       string
+		expected   Update[int]
+		errorCheck expect.ErrorCheck
 	}
 	run := func(name string, testCase testCase) {
 		t.Helper()
@@ -110,22 +119,35 @@ func TestUpdate_UnmarshalJSONFrom(t *testing.T) {
 				Update Update[int] `json:"update"`
 			}
 			err := json.Unmarshal([]byte(testCase.json), &dst)
-			expect.ErrorNil(t, err)
+			testCase.errorCheck(t, err)
 			expect.Equal(t, dst.Update, testCase.expected)
 		})
 	}
 
 	run("EmptyJSONObject", testCase{
-		json:     `{}`,
-		expected: Noop[int](),
+		json:       `{}`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("MalformedNullUpdate", testCase{
+		json:       `{"update": nup}`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNonNil,
 	})
 	run("NullUpdate", testCase{
-		json:     `{"update": null}`,
-		expected: Remove[int](),
+		json:       `{"update": null}`,
+		expected:   Remove[int](),
+		errorCheck: expect.ErrorNil,
+	})
+	run("MalformedValueUpdate", testCase{
+		json:       `{"update": invalid}`,
+		expected:   Noop[int](),
+		errorCheck: expect.ErrorNonNil,
 	})
 	run("ValueUpdate", testCase{
-		json:     fmt.Sprintf(`{"update": %v}`, testValue),
-		expected: Set(testValue),
+		json:       fmt.Sprintf(`{"update": %v}`, testValue),
+		expected:   Set(testValue),
+		errorCheck: expect.ErrorNil,
 	})
 }
 
