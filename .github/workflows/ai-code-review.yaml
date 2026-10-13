@@ -1,0 +1,23 @@
+name: AI Code Review (Niche)
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+  checks: write
+on:
+  pull_request:
+    types: [assigned]
+  issue_comment:
+    types: [created]
+jobs:
+  ai-code-review:
+    name: AI Code Review
+    uses: nicheinc/actions-ai-code-review/.github/workflows/action.yaml@v1
+    # Shortcut to avoid running on every single PR comment and on bot comments.
+    if: |
+      github.event_name != 'issue_comment' ||
+      (github.event.sender.type != 'Bot' && contains(github.event.comment.body, '/code-review-'))
+    secrets:
+      ACTIONS_AI_CODE_REVIEW_ANTHROPIC_API_KEY: ${{ secrets.ACTIONS_AI_CODE_REVIEW_ANTHROPIC_API_KEY }}
+      READ_ACCESS_TOKEN: ${{ secrets.NPM_WRITE_TOKEN }}
